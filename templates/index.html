@@ -1,0 +1,4663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uyir Score - Diabetes Risk Screening</title>
+  <style>
+/* CSS Reset and Variables */
+:root {
+  --primary: #0a72c4;
+  --primary-hover: #085ea3;
+  --primary-light: #e0f0fc;
+  --logo-red: #e0262b;
+  --logo-red-light: #fee2e2;
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-input: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+  --border: #cbd5e1;
+  --border-focus: #0a72c4;
+  --band-low: #15803d;
+  --band-low-bg: #dcfce7;
+  --band-low-text: #14532d;
+  --band-mod: #b45309;
+  --band-mod-bg: #fef3c7;
+  --band-mod-text: #78350f;
+  --band-high: #b91c1c;
+  --band-high-bg: #fee2e2;
+  --band-high-text: #7f1d1d;
+  --shadow-sm: 0 1px 3px rgba(10, 114, 196, 0.05), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(10, 114, 196, 0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 25px rgba(10, 114, 196, 0.12), 0 4px 10px rgba(0,0,0,0.06);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+}
+
+[data-theme="dark"] {
+  --primary: #38bdf8;
+  --primary-hover: #7dd3fc;
+  --primary-light: rgba(56, 189, 248, 0.15);
+  --logo-red: #f87171;
+  --logo-red-light: rgba(248, 113, 113, 0.15);
+  --bg-page: #0b1324;
+  --bg-card: #131f37;
+  --bg-subtle: #1a2948;
+  --bg-input: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-dim: #94a3b8;
+  --border: #334155;
+  --border-focus: #38bdf8;
+  --band-low: #4ade80;
+  --band-low-bg: rgba(74, 222, 128, 0.15);
+  --band-low-text: #86efac;
+  --band-mod: #fbbf24;
+  --band-mod-bg: rgba(251, 191, 36, 0.15);
+  --band-mod-text: #fde68a;
+  --band-high: #f87171;
+  --band-high-bg: rgba(248, 113, 113, 0.15);
+  --band-high-text: #fca5a5;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Accessible outline */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sticky Top Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--bg-card);
+  border-bottom: 2px solid var(--primary);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.2s ease;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 64px;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-link, .brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-main);
+  line-height: 1;
+}
+.brand-logo {
+  height: 38px;
+  width: auto;
+  border-radius: var(--radius-sm);
+  display: block;
+  flex-shrink: 0;
+}
+.brand-name {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-link {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+.nav-link:hover {
+  color: var(--primary);
+  background-color: var(--bg-subtle);
+}
+.nav-link.active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s ease;
+}
+.btn-icon:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--primary);
+}
+
+.mobile-toggle {
+  display: none;
+}
+
+/* Mobile Menu Drawer */
+.mobile-drawer {
+  display: none;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
+  flex-direction: column;
+  gap: 6px;
+}
+.mobile-drawer.open {
+  display: flex;
+}
+.mobile-nav-link {
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+.mobile-nav-link:hover, .mobile-nav-link.active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+@media (max-width: 768px) {
+  .nav-desktop { display: none; }
+  .mobile-toggle { display: grid; }
+}
+
+/* Main Content Area */
+main {
+  flex: 1;
+  width: 100%;
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.section-panel {
+  display: none;
+}
+.section-panel.active {
+  display: block;
+}
+
+/* Common Card Styles */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(10, 114, 196, 0.3);
+}
+
+.tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--bg-subtle);
+  color: var(--text-dim);
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(10, 114, 196, 0.3);
+  transition: all 0.15s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1.5px solid var(--border);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-subtle);
+  border-color: var(--text-dim);
+}
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.btn-subtle:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-main);
+}
+
+/* ========================================================= */
+/* PAGE: HOME (#home) - STATIC COMPACT VIEW                  */
+/* ========================================================= */
+.hero-card {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-subtle) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: clamp(26px, 4.2vh, 42px) clamp(24px, 4vw, 52px);
+  text-align: center;
+  margin-bottom: clamp(14px, 2.2vh, 22px);
+  box-shadow: var(--shadow-md);
+}
+.hero-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: clamp(8px, 1.4vh, 14px);
+}
+.hero-title {
+  font-size: clamp(26px, 2.7vw, 38px);
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  margin-bottom: clamp(8px, 1.4vh, 12px);
+}
+.hero-subtitle {
+  font-size: clamp(14.5px, 1.15vw, 16.5px);
+  color: var(--text-muted);
+  max-width: 720px;
+  margin: 0 auto clamp(16px, 2.5vh, 24px);
+  line-height: 1.5;
+}
+.btn-hero {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 13px 36px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(10, 114, 196, 0.28);
+}
+
+.home-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 18px);
+  margin-bottom: clamp(12px, 2vh, 18px);
+}
+.home-tile {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(14px, 2vh, 20px) clamp(16px, 1.8vw, 22px);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.home-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(10, 114, 196, 0.35);
+}
+.home-tile-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.home-tile-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.home-tile-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+.home-tile-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.home-strips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 18px);
+  margin-bottom: clamp(10px, 1.6vh, 16px);
+}
+.strip-card {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(14px, 2vh, 18px) clamp(16px, 1.8vw, 22px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.strip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+.strip-card.emergency-strip {
+  border-left: 5px solid var(--logo-red);
+}
+.strip-card.emergency-strip:hover {
+  border-color: var(--logo-red);
+}
+.strip-info {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.strip-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.strip-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.strip-icon.info {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+.strip-icon.emergency {
+  background-color: var(--logo-red-light);
+  color: var(--logo-red);
+}
+.strip-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+.strip-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.strip-arrow {
+  color: var(--text-dim);
+  flex: none;
+}
+
+.footer-disclaimer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  padding-top: clamp(8px, 1.4vh, 14px);
+  border-top: 1px solid var(--border);
+  line-height: 1.4;
+  margin-top: clamp(4px, 0.8vh, 10px);
+}
+
+@media (max-width: 768px) {
+  .hero-title { font-size: 22px; }
+  .hero-subtitle { font-size: 13px; }
+  .home-tiles-grid { grid-template-columns: 1fr; }
+  .home-strips-grid { grid-template-columns: 1fr; }
+}
+
+/* ========================================================= */
+/* PAGE: QUESTION FLOW (#test/1 ... #test/9, #review)       */
+/* ========================================================= */
+.test-layout {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.test-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: clamp(22px, 3.2vh, 32px) clamp(24px, 3.2vw, 36px);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0;
+  position: relative;
+}
+
+.test-progress-wrap {
+  margin-bottom: 12px;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.progress-step {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--bg-subtle);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.question-title {
+  font-size: clamp(22px, 2.4vw, 26px);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.25;
+  margin-bottom: 6px;
+}
+.question-why {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.45;
+}
+
+/* Question 1: Number Counter (Age) */
+.counter-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 14px 0;
+}
+.counter-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-size: 24px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.counter-btn:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.counter-input-wrap {
+  position: relative;
+  width: 130px;
+}
+.counter-input {
+  width: 100%;
+  height: 52px;
+  font-size: 28px;
+  font-weight: 800;
+  text-align: center;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  font-family: inherit;
+}
+.counter-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+/* Choice Buttons (Q2, Q6, etc.) */
+.choices-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+.choice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.choice-btn:hover {
+  border-color: var(--primary);
+  background-color: var(--bg-subtle);
+  transform: translateY(-1px);
+}
+.choice-btn.selected {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+}
+.choice-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.choice-btn.selected .choice-indicator {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+/* Big Number Inputs (Height, Weight, Blood Sugar, etc.) */
+.input-group {
+  margin-bottom: 10px;
+}
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.input-wrap-with-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.big-input {
+  width: 100%;
+  height: 44px;
+  padding: 6px 54px 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.big-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+.input-unit {
+  position: absolute;
+  right: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+.input-hint {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+/* Live BMI Indicator Banner */
+.bmi-live-banner {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bmi-indicator-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.bmi-live-text {
+  font-size: 12.5px;
+  color: var(--text-main);
+  line-height: 1.35;
+}
+
+/* Number Buttons Grid (Pregnancies) */
+.num-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.num-btn {
+  height: 48px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0 6px;
+  text-align: center;
+}
+.num-btn:hover {
+  border-color: var(--primary);
+  background-color: var(--bg-subtle);
+}
+.num-btn.selected {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Friendly Info/Alert Cards Inside Questions */
+.notice-card {
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  margin: 8px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.notice-card.info {
+  background-color: var(--primary-light);
+  border: 1px solid rgba(10, 114, 196, 0.2);
+  color: var(--text-main);
+}
+.notice-card.warning {
+  background-color: var(--band-mod-bg);
+  border: 1px solid rgba(180, 83, 9, 0.2);
+  color: var(--band-mod-text);
+}
+.notice-card.emergency {
+  background-color: var(--logo-red-light);
+  border: 1px solid rgba(224, 38, 43, 0.2);
+  color: var(--band-high-text);
+}
+
+/* Test Navigation Bar */
+.test-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ========================================================= */
+/* PAGE: REVIEW ANSWERS (#test/review)                       */
+/* ========================================================= */
+.review-answers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+@media (min-width: 600px) {
+  .review-answers-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+  }
+}
+.review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  gap: 8px;
+  min-width: 0;
+}
+.review-item-main {
+  min-width: 0;
+}
+.review-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.review-item-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.review-item-val.blank-note {
+  color: var(--text-dim);
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Static Viewport Mode - Disables Scrolling on Desktop */
+@media (min-width: 768px) and (min-height: 480px) {
+  body.static-view {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  body.static-view main {
+    height: calc(100dvh - 64px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  body.static-view .page-container {
+    height: 100%;
+    max-width: 1240px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(10px, 1.8vh, 24px) clamp(16px, 2.5vw, 32px);
+  }
+  body.static-view .section-panel:not(.active) {
+    display: none !important;
+  }
+  body.static-view #page-home.active {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+  }
+  body.static-view #page-test.active {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  body.static-view #page-help.active {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  body.static-view .test-layout {
+    margin: auto;
+    width: 100%;
+    max-width: 700px;
+  }
+}
+
+/* Compact scaling for smaller desktop viewport heights (500px - 640px) */
+@media (min-width: 768px) and (max-height: 640px) {
+  .hero-card { padding: 16px 20px 14px; margin-bottom: 8px; }
+  .hero-tag { margin-bottom: 4px; padding: 2px 8px; font-size: 10.5px; }
+  .hero-title { font-size: 22px; margin-bottom: 4px; }
+  .hero-subtitle { font-size: 13px; margin: 0 auto 10px; }
+  .btn-hero { padding: 9px 24px; font-size: 14.5px; }
+  .home-tiles-grid { gap: 8px; margin-bottom: 8px; }
+  .home-tile { padding: 8px 12px; gap: 10px; }
+  .home-tile-icon { width: 34px; height: 34px; }
+  .home-tile-icon svg { width: 18px; height: 18px; }
+  .home-tile-title { font-size: 13.5px; }
+  .home-tile-desc { font-size: 11.5px; }
+  .home-strips-grid { gap: 8px; margin-bottom: 6px; }
+  .strip-card { padding: 8px 12px; gap: 10px; }
+  .strip-icon { width: 34px; height: 34px; }
+  .strip-icon svg { width: 18px; height: 18px; }
+  .strip-title { font-size: 13.5px; }
+  .strip-desc { font-size: 11.5px; }
+  .footer-disclaimer { padding-top: 4px; margin-top: 2px; font-size: 10.5px; }
+}
+
+/* ========================================================= */
+/* PAGE: RESULT (#test/result)                               */
+/* ========================================================= */
+.result-layout {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.result-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.result-hero-card {
+  text-align: center;
+  padding: var(--space-6) var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+/* Semicircle Gauge */
+.gauge-box {
+  width: 240px;
+  margin: 0 auto var(--space-4);
+  text-align: center;
+}
+.gauge-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.gauge-arc {
+  stroke-linecap: round;
+  transition: stroke 0.3s ease;
+}
+.arc-low { stroke: var(--band-low); }
+.arc-mod { stroke: var(--band-mod); }
+.arc-high { stroke: var(--band-high); }
+.gauge-needle {
+  transform-origin: 100px 95px;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.needle-line { stroke: var(--text-main); }
+.needle-pivot { fill: var(--text-main); }
+.needle-dot { fill: var(--bg-card); }
+
+.gauge-center-text {
+  margin-top: 8px;
+  text-align: center;
+}
+.gauge-percentage {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+.gauge-sublabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 4px;
+}
+
+/* Pill */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 800;
+}
+.pill-Low {
+  background-color: var(--band-low-bg);
+  color: var(--band-low-text);
+  border: 1px solid var(--band-low);
+}
+.pill-Moderate {
+  background-color: var(--band-mod-bg);
+  color: var(--band-mod-text);
+  border: 1px solid var(--band-mod);
+}
+.pill-High {
+  background-color: var(--band-high-bg);
+  color: var(--band-high-text);
+  border: 1px solid var(--band-high);
+}
+
+.result-meaning {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+  max-width: 580px;
+  margin: var(--space-3) auto 0;
+  line-height: 1.45;
+}
+
+/* Stacked Result Cards */
+.result-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.subcard-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: var(--space-4);
+}
+
+/* Diverging Factor Bars */
+.factor-row {
+  margin-bottom: var(--space-3);
+}
+.factor-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.factor-track {
+  width: 100%;
+  height: 10px;
+  background-color: var(--bg-subtle);
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+.factor-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+.factor-fill.raises {
+  background-color: var(--band-high);
+}
+.factor-fill.lowers {
+  background-color: var(--band-low);
+}
+
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-4);
+}
+.chip-item {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background-color: var(--bg-subtle);
+  color: var(--text-dim);
+}
+
+/* Actions Checklist */
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.checklist-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--band-low-bg);
+  color: var(--band-low);
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-top: 1px;
+}
+
+/* Loading Overlay */
+.loading-box {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+}
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3.5px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto var(--space-4);
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================================= */
+/* PAGES: HEALTH GUIDE, HELP, FOR CLINICS, ABOUT             */
+/* ========================================================= */
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+.page-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-6);
+  max-width: 720px;
+}
+
+/* 4-Card Responsive Grid (Guide) */
+.guide-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.guide-metric-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+}
+.guide-metric-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+.guide-metric-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .guide-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .guide-metrics-grid { grid-template-columns: 1fr; }
+}
+
+/* Emergency Alert Card (Help & Result) */
+.alert-card-emergency {
+  background-color: var(--bg-card);
+  border: 1.5px solid var(--logo-red);
+  border-left: 6px solid var(--logo-red);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+.emergency-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.emergency-badge {
+  background-color: var(--logo-red-light);
+  color: var(--logo-red);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* When to Get Help 2-Column Responsive Layout */
+.help-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 12px;
+}
+@media (max-width: 820px) {
+  .help-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+.help-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.help-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.help-card.emergency {
+  border: 1.5px solid var(--logo-red);
+  border-left: 6px solid var(--logo-red);
+}
+.help-card.clinical {
+  border: 1.5px solid var(--border);
+  border-left: 6px solid var(--band-mod);
+}
+.help-note-bar {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Clinic KPI Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.kpi-tile {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  min-width: 0;
+  overflow: hidden;
+}
+.kpi-number {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-number.text-val {
+  font-size: 20px;
+  line-height: 1.25;
+}
+.kpi-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 4px;
+}
+.kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 900px) {
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* Donut & Analytics Grid */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+@media (max-width: 768px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+/* Estimator Layout (2 columns) */
+.estimator-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+@media (max-width: 860px) {
+  .estimator-layout { grid-template-columns: 1fr; }
+}
+.calc-field-group {
+  margin-bottom: var(--space-3);
+}
+.calc-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.calc-hint {
+  display: block;
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--text-dim);
+}
+.calc-input {
+  width: 100%;
+  height: 38px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  font-size: 14px;
+  font-family: inherit;
+}
+.calc-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.calc-result-tile {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.calc-result-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.calc-result-val.highlight {
+  color: var(--band-low);
+}
+.calc-result-lbl {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* FAQ Accordion */
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+  background-color: var(--bg-card);
+}
+.faq-trigger {
+  width: 100%;
+  padding: var(--space-4);
+  text-align: left;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.faq-trigger:hover {
+  background-color: var(--bg-subtle);
+}
+.faq-content {
+  padding: 0 var(--space-4) var(--space-4);
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: none;
+}
+.faq-item.open .faq-content {
+  display: block;
+}
+
+/* Modal & Health Screening Report */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+.report-card-modal {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.report-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-subtle);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.report-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.report-sheet-doc {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+[data-theme="dark"] .report-sheet-doc {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+/* Print Stylesheet */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #report-sheet-print, #report-sheet-print * {
+    visibility: visible !important;
+  }
+  #report-sheet-print {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 20px !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .report-card-modal {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  .report-modal-header, .site-header, .test-nav-bar, .result-top-bar, .footer-disclaimer, .btn-primary, .btn-secondary, .btn-subtle, .btn-icon, .mobile-drawer, .chatbot-container {
+    display: none !important;
+  }
+}
+  
+/* ========================================================= */
+/* FLOATING CHATBOT WIDGET                                   */
+/* ========================================================= */
+.chatbot-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.chatbot-launcher-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Floating Action Button */
+.chatbot-trigger-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 18px rgba(10, 114, 196, 0.38), 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+  outline: none;
+}
+
+.chatbot-trigger-btn:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(10, 114, 196, 0.45), 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chatbot-trigger-btn:active {
+  transform: scale(0.95);
+}
+
+.chatbot-trigger-btn:focus-visible {
+  outline: 3px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+/* Green online status badge */
+.chatbot-badge-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  background-color: #22c55e;
+  border: 2px solid var(--bg-card);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: pulse-green 2.4s infinite;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Tooltip Pill */
+.chatbot-tooltip-pill {
+  position: absolute;
+  right: 64px;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chatbot-launcher-wrap:hover .chatbot-tooltip-pill {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.chatbot-container.open .chatbot-tooltip-pill {
+  display: none !important;
+}
+
+/* Popup Chat Window */
+.chatbot-window {
+  position: absolute;
+  bottom: 66px;
+  right: 0;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  height: 510px;
+  max-height: calc(100vh - 100px);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: chatbotPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1510;
+}
+
+@keyframes chatbotPop {
+  from { opacity: 0; transform: scale(0.9) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header */
+.chatbot-header {
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.chatbot-header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chatbot-avatar {
+  width: 32px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.chatbot-header-title {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.chatbot-header-status {
+  font-size: 11px;
+  opacity: 0.92;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chatbot-status-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #4ade80;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.chatbot-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.chatbot-btn-h {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.chatbot-btn-h:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Chat Messages */
+.chatbot-body {
+  flex: 1;
+  padding: 14px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: var(--bg-page);
+  scroll-behavior: smooth;
+}
+
+.chat-bubble {
+  max-width: 86%;
+  padding: 9px 13px;
+  font-size: 12.8px;
+  line-height: 1.45;
+  border-radius: 14px;
+  word-break: break-word;
+}
+
+.chat-bubble-bot {
+  align-self: flex-start;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-top-left-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.chat-bubble-bot ul, .chat-bubble-bot ol {
+  margin: 5px 0 5px 16px;
+  padding: 0;
+}
+
+.chat-bubble-bot li {
+  margin-bottom: 3px;
+}
+
+.chat-bubble-bot strong {
+  color: var(--text-main);
+}
+
+.chat-bubble-user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+  color: #ffffff;
+  border-top-right-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Chips bar */
+.chatbot-chips-bar {
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px 8px;
+  background-color: var(--bg-page);
+  overflow-x: auto;
+  white-space: nowrap;
+  border-top: 1px solid var(--border);
+  scrollbar-width: none;
+}
+
+.chatbot-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.chatbot-chip-btn {
+  background-color: var(--bg-card);
+  color: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.chatbot-chip-btn:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* Typing indicator */
+.chat-typing {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  margin: 0 12px 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  border-top-left-radius: 3px;
+  width: fit-content;
+}
+
+.chat-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--text-dim);
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.chat-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.chat-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0.2); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Chat Input Footer */
+.chatbot-footer {
+  padding: 8px 10px 8px;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chatbot-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatbot-input {
+  flex: 1;
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 13px;
+  font-size: 12.8px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.chatbot-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.chatbot-send-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.chatbot-send-btn:hover {
+  background: var(--primary-hover);
+  transform: scale(1.05);
+}
+
+.chatbot-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.chatbot-disclaimer {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 5px;
+  line-height: 1.25;
+}
+
+@media (max-width: 600px) {
+  .chatbot-container {
+    bottom: 16px;
+    right: 16px;
+  }
+  .chatbot-trigger-btn {
+    width: 48px;
+    height: 48px;
+  }
+  .chatbot-window {
+    bottom: 60px;
+    right: 0;
+    width: calc(100vw - 32px);
+    height: min(460px, calc(100vh - 90px));
+  }
+  .chatbot-tooltip-pill {
+    display: none;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="#home" class="brand-link" aria-label="Uyir Score Home">
+        <img src="/logo.png" alt="Uyir Score Logo" class="brand-logo" height="34">
+        <span class="brand-name">Uyir Score</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="nav-desktop" aria-label="Main Navigation">
+        <a href="#test" class="nav-link" id="nav-test">Check my risk</a>
+        <a href="#guide" class="nav-link" id="nav-guide">Health guide</a>
+        <a href="#help" class="nav-link" id="nav-help">When to get help</a>
+        <a href="#clinics" class="nav-link" id="nav-clinics">For clinics</a>
+        <a href="#about" class="nav-link" id="nav-about">About</a>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="header-actions">
+        <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="toggleTheme()">
+          <!-- SVG icon filled dynamically -->
+        </button>
+        <button id="mobile-menu-btn" class="btn-icon mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false" onclick="toggleMobileMenu()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div id="mobile-menu" class="mobile-drawer" aria-label="Mobile Navigation">
+      <a href="#test" class="mobile-nav-link" onclick="closeMobileMenu()">Check my risk</a>
+      <a href="#guide" class="mobile-nav-link" onclick="closeMobileMenu()">Health guide</a>
+      <a href="#help" class="mobile-nav-link" onclick="closeMobileMenu()">When to get help</a>
+      <a href="#clinics" class="mobile-nav-link" onclick="closeMobileMenu()">For clinics</a>
+      <a href="#about" class="mobile-nav-link" onclick="closeMobileMenu()">About</a>
+    </div>
+  </header>
+
+  <!-- Live Announcer for Accessibility -->
+  <div id="screen-announcer" class="sr-only" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"></div>
+
+  <!-- Main Viewports -->
+  <main>
+    <div class="page-container">
+
+      <!-- ============================================== -->
+      <!-- 1. HOME VIEW (#home)                           -->
+      <!-- ============================================== -->
+      <section id="page-home" class="section-panel active">
+        <!-- Hero Banner -->
+        <div class="hero-card">
+          <span class="hero-tag">Simple health check</span>
+          <h1 class="hero-title">Check your diabetes risk in about 2 minutes</h1>
+          <p class="hero-subtitle">Answer 9 quick questions about your health and daily life. Get clear, plain-language guidance to protect your future.</p>
+          <a href="#test/1" class="btn-primary btn-hero">Start the test</a>
+        </div>
+
+        <!-- 3 Feature Tiles -->
+        <div class="home-tiles-grid">
+          <div class="home-tile">
+            <div class="home-tile-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="home-tile-title">Short questions</div>
+              <div class="home-tile-desc">Takes about 2 minutes, simple everyday answers.</div>
+            </div>
+          </div>
+
+          <div class="home-tile">
+            <div class="home-tile-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div class="home-tile-title">No name needed</div>
+              <div class="home-tile-desc">Your personal identity stays private on this device.</div>
+            </div>
+          </div>
+
+          <div class="home-tile">
+            <div class="home-tile-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div>
+              <div class="home-tile-title">Simple advice</div>
+              <div class="home-tile-desc">Clear guidance and next steps in plain words.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Banner Strips -->
+        <div class="home-strips-grid">
+          <a href="#guide" class="strip-card">
+            <div class="strip-info">
+              <div class="strip-icon info">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </div>
+              <div>
+                <div class="strip-title">Know the early signs</div>
+                <div class="strip-desc">Learn the physical signs and everyday numbers that matter.</div>
+              </div>
+            </div>
+            <div class="strip-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a href="#help" class="strip-card emergency-strip">
+            <div class="strip-info">
+              <div class="strip-icon emergency">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <div>
+                <div class="strip-title">Warning signs - when to call 108</div>
+                <div class="strip-desc">Emergency guidance for acute symptoms across India.</div>
+              </div>
+            </div>
+            <div class="strip-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+        </div>
+
+        <!-- Footer Disclaimer -->
+        <footer class="footer-disclaimer">
+          General information only, not a diagnosis. Confirm with a doctor and a lab test.
+        </footer>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 2. QUESTION SCREEN CONTAINER (#test/*)         -->
+      <!-- ============================================== -->
+      <section id="page-test" class="section-panel">
+        <div class="test-layout">
+          <!-- Dynamic Question Card -->
+          <div id="test-card-mount"></div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 3. HEALTH GUIDE VIEW (#guide)                  -->
+      <!-- ============================================== -->
+      <section id="page-guide" class="section-panel">
+        <h1 class="page-title">Health guide</h1>
+        <p class="page-desc">Understanding your numbers, daily habits, and practical steps to maintain healthy blood sugar.</p>
+
+        <!-- 4 Metric Cards in 1 Row (Age removed as requested) -->
+        <div class="guide-metrics-grid">
+          <div class="guide-metric-card">
+            <div class="guide-metric-title">Blood sugar</div>
+            <div class="guide-metric-text">
+              Measured 2 hours after a glucose drink. Under 140 mg/dL is typical. Fasting tests should typically stay below 100 mg/dL.
+            </div>
+          </div>
+
+          <div class="guide-metric-card">
+            <div class="guide-metric-title">BMI & Weight</div>
+            <div class="guide-metric-text">
+              For Indian adults, a BMI of 23 or above indicates overweight, and 25 or above is higher risk. Even modest weight loss helps.
+            </div>
+          </div>
+
+          <div class="guide-metric-card">
+            <div class="guide-metric-title">Blood pressure</div>
+            <div class="guide-metric-text">
+              Diastolic (the lower number) under 80 mmHg is typical. High blood pressure often occurs alongside high blood sugar.
+            </div>
+          </div>
+
+          <div class="guide-metric-card">
+            <div class="guide-metric-title">Family history</div>
+            <div class="guide-metric-text">
+              Having parents or siblings with diabetes increases your risk due to shared genetics and household nutrition habits.
+            </div>
+          </div>
+        </div>
+
+        <!-- Early Signs -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">Early signs to watch for</h2>
+            <span class="tag">Awareness</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:var(--space-3)">
+            <div style="background:var(--bg-subtle);padding:12px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:2px">Unusual thirst</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Feeling thirsty even after drinking plenty of water.</p>
+            </div>
+            <div style="background:var(--bg-subtle);padding:12px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:2px">Frequent urination</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Waking multiple times at night to pass urine.</p>
+            </div>
+            <div style="background:var(--bg-subtle);padding:12px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:2px">Constant tiredness</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Feeling exhausted even after getting adequate sleep.</p>
+            </div>
+            <div style="background:var(--bg-subtle);padding:12px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:2px">Slow healing cuts</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Small wounds, sores, or skin infections taking weeks to heal.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Small Habits That Help -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">Small habits that make a big difference</h2>
+            <span class="tag">Prevention</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:var(--space-3)">
+            <div class="checklist-item">
+              <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div><b>Brisk daily walk</b>: Aim for 30 minutes of walking, 5 days each week.</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div><b>Traditional millets</b>: Replace white rice or maida with ragi, jowar, or bajra.</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div><b>Reduce sweet drinks</b>: Enjoy chai without sugar and drink water or fresh buttermilk.</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div><b>Routine tests</b>: Check fasting sugar and HbA1c at your Primary Health Centre.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:var(--space-6)">
+          <a href="#test/1" class="btn-primary" style="font-size:17px;padding:14px 32px">Start the test now</a>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 4. WHEN TO GET HELP VIEW (#help)               -->
+      <!-- ============================================== -->
+      <section id="page-help" class="section-panel" style="width:100%;margin:0 auto">
+        <h1 class="page-title" style="margin-bottom:3px;font-size:clamp(22px,2.2vw,28px)">When to get help</h1>
+        <p class="page-desc" style="margin-bottom:12px;font-size:clamp(13px,1.1vw,14.5px)">Emergency guidance, clinical advice, and what to do if you feel unwell.</p>
+
+        <!-- 2-Column Responsive Cards Grid -->
+        <div class="help-cards-grid">
+          <!-- Left Column: Red Emergency Card -->
+          <div class="help-card emergency">
+            <div>
+              <div class="emergency-header">
+                <span class="emergency-badge">Emergency (India)</span>
+                <h2 style="font-size:17px;font-weight:800;color:var(--band-high-text);margin:0">Call emergency services: 108 or 112</h2>
+              </div>
+              <p style="font-size:13.5px;font-weight:600;margin-bottom:6px">
+                In India, dial <strong>108</strong> for free ambulance or <strong>112</strong> for national helpline.
+              </p>
+              <p style="font-size:12.5px;color:var(--text-main);margin-bottom:6px">
+                Seek immediate emergency attention if you or someone experiences:
+              </p>
+              <ul style="padding-left:18px;font-size:12.5px;line-height:1.45;margin-bottom:0">
+                <li style="margin-bottom:3px">Sudden weakness or numbness in face, arm, or leg (especially one side).</li>
+                <li style="margin-bottom:3px">Severe chest pain, pressure, or difficulty breathing.</li>
+                <li style="margin-bottom:3px">Extreme confusion, slurred speech, or loss of consciousness with severe sugar levels.</li>
+                <li>Persistent severe vomiting or inability to keep liquids down.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right Column: Amber See a Doctor Soon Card -->
+          <div class="help-card clinical">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <h2 style="font-size:17px;font-weight:800;color:var(--band-mod-text);margin:0">See a doctor soon (Non-emergency)</h2>
+                <span class="tag">Clinical check</span>
+              </div>
+              <p style="font-size:13px;color:var(--text-main);line-height:1.45;margin-bottom:6px">
+                Visit a Primary Health Centre (PHC), Community Health Centre, or diabetologist if you notice:
+              </p>
+              <ul style="padding-left:18px;font-size:12.5px;line-height:1.45;margin-bottom:0">
+                <li style="margin-bottom:3px">Consistently elevated home sugar readings (fasting &gt; 126 mg/dL or post-meal &gt; 200 mg/dL).</li>
+                <li style="margin-bottom:3px">Persistent tingling, numbness, or burning sensation in feet or hands.</li>
+                <li style="margin-bottom:3px">Blurry vision that does not improve after resting.</li>
+                <li>Frequent recurring skin or urinary tract infections.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full-Width Bottom Note Bar -->
+        <div class="help-note-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div style="font-size:12.5px;line-height:1.45;color:var(--text-muted)">
+            <strong style="color:var(--text-main)">Please remember:</strong> Prediabetes and early high blood sugar are common and manageable. Taking action early through simple lifestyle changes and guidance from a local healthcare provider can protect your long-term health.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 5. FOR CLINICS VIEW (#clinics)                 -->
+      <!-- ============================================== -->
+      <section id="page-clinics" class="section-panel">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-4);flex-wrap:wrap;gap:var(--space-2)">
+          <div>
+            <h1 class="page-title" style="margin-bottom:4px">For clinics & health planners</h1>
+            <p class="page-desc" style="margin-bottom:0">Screening analytics and illustrative prevention economics for Indian clinics and healthcare programmes.</p>
+          </div>
+          <span class="tag">Sample data</span>
+        </div>
+
+        <!-- KPI Grid (Numeric: 30px, Text: 20px) -->
+        <div class="kpi-grid">
+          <div class="kpi-tile">
+            <div class="kpi-number" id="kpi-n">768</div>
+            <div class="kpi-name">People in sample</div>
+            <div class="kpi-sub">Adults in study sample</div>
+          </div>
+
+          <div class="kpi-tile">
+            <div class="kpi-number" id="kpi-prev">35%</div>
+            <div class="kpi-name">Share with diabetes</div>
+            <div class="kpi-sub">Within the research sample</div>
+          </div>
+
+          <div class="kpi-tile">
+            <div class="kpi-number text-val" id="kpi-caught">76 out of 100</div>
+            <div class="kpi-name">Cases caught</div>
+            <div class="kpi-sub">About 76 of every 100</div>
+          </div>
+
+          <div class="kpi-tile">
+            <div class="kpi-number text-val" id="kpi-live">No checks yet</div>
+            <div class="kpi-name">Saved checks</div>
+            <div class="kpi-sub">Saved on this device</div>
+          </div>
+        </div>
+
+        <!-- Donut & Analytics -->
+        <div class="analytics-grid">
+          <div class="card card-hover">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+              <h3 style="font-size:16px;font-weight:700;margin:0">Risk levels in sample</h3>
+              <span class="tag">Distribution</span>
+            </div>
+            <div id="bands-chart-wrap" style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap"></div>
+          </div>
+
+          <div class="card card-hover">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+              <h3 style="font-size:16px;font-weight:700;margin:0">Risk by age group</h3>
+              <span class="tag">Sample data</span>
+            </div>
+            <div id="ages-chart-wrap" style="display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+        </div>
+
+        <!-- Prevention Economics Overview Card (Static) -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3);flex-wrap:wrap;gap:8px">
+            <div>
+              <h2 style="font-size:18px;font-weight:800;margin:0">Illustrative prevention economics (India scenario)</h2>
+              <div style="font-size:12.5px;color:var(--text-dim)">Sample data &#8226; Baseline clinical estimate for 10,000 community screenings.</div>
+            </div>
+            <span class="tag">Illustrative scenario</span>
+          </div>
+
+          <div class="estimator-layout" style="margin-top:var(--space-3)">
+            <!-- Left: Baseline Assumptions (Static Read-Only) -->
+            <div style="background:var(--bg-subtle);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px">
+              <h3 style="font-size:14.5px;font-weight:700;margin-bottom:10px;color:var(--text-main)">Standard Indian Community Population</h3>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.4">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px">
+                  <span style="color:var(--text-muted)">Annual population screened</span>
+                  <strong>10,000 people</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px">
+                  <span style="color:var(--text-muted)">Screening unit cost</span>
+                  <strong>&#8377;150 / person</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px">
+                  <span style="color:var(--text-muted)">Expected high-risk rate</span>
+                  <strong>15% (1,500 people)</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px">
+                  <span style="color:var(--text-muted)">Lifestyle programme uptake</span>
+                  <strong>60% (900 joined)</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px">
+                  <span style="color:var(--text-muted)">Programme delivery cost</span>
+                  <strong>&#8377;4,000 / participant</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                  <span style="color:var(--text-muted)">Untreated direct care cost</span>
+                  <strong>&#8377;25,000 / case / year</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Projected Impact & Financials (Static KPI Tiles) -->
+            <div>
+              <div class="calc-results-grid">
+                <div class="calc-result-tile">
+                  <div class="calc-result-val">10,000</div>
+                  <div class="calc-result-lbl">People screened</div>
+                </div>
+                <div class="calc-result-tile">
+                  <div class="calc-result-val">1,500</div>
+                  <div class="calc-result-lbl">High risk identified</div>
+                </div>
+                <div class="calc-result-tile">
+                  <div class="calc-result-val">900</div>
+                  <div class="calc-result-lbl">Joined programme</div>
+                </div>
+                <div class="calc-result-tile">
+                  <div class="calc-result-val highlight">54.0</div>
+                  <div class="calc-result-lbl">Cases prevented (30%)</div>
+                </div>
+                <div class="calc-result-tile">
+                  <div class="calc-result-val">&#8377;51.00 lakh</div>
+                  <div class="calc-result-lbl">Total programme cost</div>
+                </div>
+                <div class="calc-result-tile">
+                  <div class="calc-result-val highlight">&#8377;38.19 lakh</div>
+                  <div class="calc-result-lbl">Medical costs averted (3 yrs)</div>
+                </div>
+              </div>
+
+              <!-- Summary banner -->
+              <div style="margin-top:10px;padding:10px 14px;background:var(--primary-light);border:1px solid rgba(10,114,196,0.25);border-radius:var(--radius-md);display:flex;align-items:center;gap:10px">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div style="font-size:12px;line-height:1.4;color:var(--text-main)">
+                  Early screening and community intervention significantly mitigates costly cardiovascular and renal complications over a 3-year horizon.
+                </div>
+              </div>
+
+              <div style="font-size:11.5px;color:var(--text-dim);margin-top:8px;line-height:1.4">
+                Placeholder assumptions for demonstration. Values formatted in Indian Lakh and Crore (&#8377;). Prevention results in real clinical programmes may vary.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Screenings Table -->
+        <div class="card card-hover">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+            <h3 style="font-size:16px;font-weight:700;margin:0">Recent checks on this computer</h3>
+            <span class="tag">Local records</span>
+          </div>
+          <div id="recent-checks-mount"></div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 6. ABOUT VIEW (#about)                         -->
+      <!-- ============================================== -->
+      <section id="page-about" class="section-panel">
+        <h1 class="page-title">About Uyir Score</h1>
+        <p class="page-desc">Making diabetes screening approachable, transparent, and private for Indian families.</p>
+
+        <!-- Our Story -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">Why Uyir Score exists</h2>
+            <span class="tag">Our story</span>
+          </div>
+          <p style="font-size:14px;line-height:1.6;color:var(--text-main)">
+            <strong>Uyir means life in Tamil.</strong> Across India, millions of people live with early elevated blood sugar or prediabetes without knowing it. Uyir Score was designed to provide an easy, question-by-question check that translates complex measurements into plain-language advice before health problems develop.
+          </p>
+        </div>
+
+        <!-- How It Works in 3 Steps -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">How it works in 3 steps</h2>
+            <span class="tag">Process</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:var(--space-3)">
+            <div style="background:var(--bg-subtle);padding:14px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:4px">1. Answer simple questions</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Input your age, body measurements, blood sugar, and health history.</p>
+            </div>
+            <div style="background:var(--bg-subtle);padding:14px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:4px">2. Pattern comparison</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Your numbers are compared against established research patterns.</p>
+            </div>
+            <div style="background:var(--bg-subtle);padding:14px;border-radius:10px">
+              <b style="font-size:14px;display:block;margin-bottom:4px">3. Plain-language advice</b>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0">Receive clear explanations, top factors, and steps to discuss with your doctor.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Limitations & Dataset Honesty -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">What this cannot do (Important limitations)</h2>
+            <span class="tag">Honesty</span>
+          </div>
+          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.55;margin-bottom:8px">
+            This tool is <strong>not a medical diagnosis</strong> and cannot prescribe medications or treatments.
+          </p>
+          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.55;margin:0">
+            The underlying study is based on 768 women of Pima heritage from Arizona, USA (the Pima are a Native American community, not people from India). Indian adults frequently develop diabetes at lower body weights and younger ages, so this estimate is only a rough guide. Always confirm your results with a doctor and a formal blood test at a Primary Health Centre or diagnostic laboratory.
+          </p>
+        </div>
+
+        <!-- Truthful Privacy Notice -->
+        <div class="card card-hover" style="margin-bottom:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">Your privacy</h2>
+            <span class="tag">Privacy</span>
+          </div>
+          <p style="font-size:13.5px;color:var(--text-main);line-height:1.55;margin:0">
+            Your health numbers are checked on this computer. To write your simple advice, the numbers - never the reference label - are sent securely to an online writing service. Results are saved on this computer for the clinic summary. Please do not type your real name.
+          </p>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="card card-hover">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+            <h2 style="font-size:18px;font-weight:800;margin:0">Frequently asked questions</h2>
+            <span class="tag">FAQ</span>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-trigger" onclick="toggleFaq(this)">
+              <span>Is this test a clinical diagnosis?</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              No. Uyir Score is a screening and educational tool designed to help you understand risk factors. Only a qualified doctor using certified laboratory blood tests (such as fasting blood glucose or HbA1c) can diagnose diabetes.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-trigger" onclick="toggleFaq(this)">
+              <span>What should I do if my score is High risk?</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              Do not panic. A high score simply indicates that your numbers match patterns where diabetes is more common. Visit your local Primary Health Centre (PHC), Ayushman Arogya Mandir, or doctor for a formal blood check-up.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-trigger" onclick="toggleFaq(this)">
+              <span>Can I complete the check if I don&#39;t know my blood pressure or lab tests?</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              Yes! Blood pressure, family history, pregnancies, and lab numbers are optional. If you skip them, typical baseline values are used automatically. However, age, BMI, and a recent blood sugar reading are required for an accurate estimate.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-trigger" onclick="toggleFaq(this)">
+              <span>Is my personal data saved or shared?</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              No personal identity or names are requested or stored. Your clinical numbers are evaluated locally on this computer. Anonymized numbers are securely passed to generate conversational explanations, and saved only on this device for the clinic log.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Health Screening Report Modal -->
+  <div id="report-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeReportModal()">
+    <div class="modal-card report-card-modal">
+      <div class="report-modal-header">
+        <div>
+          <h3 style="font-size:17px;font-weight:800;margin:0 0 2px">Health Screening Report</h3>
+          <div style="font-size:12px;color:var(--text-dim)">Clinical risk assessment summary for Indian adults</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="button" class="btn-secondary" style="padding:6px 12px;font-size:13px" onclick="downloadReportTxt()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download (.txt)</span>
+          </button>
+          <button type="button" class="btn-secondary" style="padding:6px 12px;font-size:13px" onclick="copyFullReport()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="btn-copy-report-lbl">Copy text</span>
+          </button>
+          <button type="button" class="btn-primary" style="padding:6px 14px;font-size:13px" onclick="printReportDocument()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span>Print sheet</span>
+          </button>
+          <button type="button" class="btn-icon" aria-label="Close report" onclick="closeReportModal()" style="width:32px;height:32px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="report-modal-body">
+        <div id="report-sheet-print" class="report-sheet-doc"></div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Floating Chatbot Widget (Present on all pages) -->
+  <aside id="chatbot-container" class="chatbot-container" aria-label="Health Chatbot Assistant">
+    <!-- Chatbot Window Popup -->
+    <div id="chatbot-window" class="chatbot-window" role="dialog" aria-modal="false" aria-label="UyirBot Health Assistant" style="display:none">
+      <!-- Header -->
+      <div class="chatbot-header">
+        <div class="chatbot-header-info">
+          <div class="chatbot-avatar" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="3"></rect>
+              <circle cx="9" cy="16" r="1" fill="currentColor"></circle>
+              <circle cx="15" cy="16" r="1" fill="currentColor"></circle>
+              <path d="M8 7a4 4 0 0 1 8 0v4H8V7z"></path>
+              <line x1="12" y1="2" x2="12" y2="4"></line>
+            </svg>
+          </div>
+          <div>
+            <div class="chatbot-header-title">UyirBot</div>
+            <div class="chatbot-header-status">
+              <span class="chatbot-status-dot"></span>
+              <span>Online • Health Assistant</span>
+            </div>
+          </div>
+        </div>
+        <div class="chatbot-header-actions">
+          <button type="button" class="chatbot-btn-h" onclick="resetChatbotHistory()" title="Clear conversation" aria-label="Clear chat conversation">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          </button>
+          <button type="button" class="chatbot-btn-h" onclick="toggleChatbot(false)" title="Close chat" aria-label="Close chat window">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Body -->
+      <div id="chatbot-body" class="chatbot-body" role="log" aria-live="polite">
+        <!-- Messages rendered by JS -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="chatbot-typing" class="chat-typing" style="display:none">
+        <span class="chat-typing-dot"></span>
+        <span class="chat-typing-dot"></span>
+        <span class="chat-typing-dot"></span>
+      </div>
+
+      <!-- Suggested Prompt Chips -->
+      <div id="chatbot-chips-wrap" class="chatbot-chips-bar">
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What is normal blood sugar?')">Normal blood sugar?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How does the Uyir Score test work?')">How does test work?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How can I lower my diabetes risk?')">Lower diabetes risk?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What is BMI for Indians?')">BMI guidelines?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('When should I seek emergency care?')">Emergency warning signs</button>
+      </div>
+
+      <!-- Input Footer -->
+      <form id="chatbot-form" class="chatbot-footer" onsubmit="handleChatbotSubmit(event)">
+        <div class="chatbot-input-row">
+          <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask UyirBot a health question..." autocomplete="off" aria-label="Type your message">
+          <button type="submit" id="chatbot-send-btn" class="chatbot-send-btn" aria-label="Send message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="chatbot-disclaimer">General guidance only. Not medical diagnosis. In emergencies dial 108/112.</div>
+      </form>
+    </div>
+
+    <!-- Floating Chatbot Launcher Button -->
+    <div class="chatbot-launcher-wrap">
+      <div id="chatbot-pill" class="chatbot-tooltip-pill">
+        <span>Need help? Chat with <strong>UyirBot</strong></span>
+      </div>
+      <button type="button" id="chatbot-trigger-btn" class="chatbot-trigger-btn" onclick="toggleChatbot()" aria-label="Open health assistant chatbot" aria-expanded="false" title="Chat with UyirBot">
+        <!-- Chatbot / Robot Icon (visible when closed) -->
+        <span class="chatbot-icon-closed">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="3"></rect>
+            <circle cx="9" cy="16" r="1.2" fill="currentColor"></circle>
+            <circle cx="15" cy="16" r="1.2" fill="currentColor"></circle>
+            <path d="M8 7a4 4 0 0 1 8 0v4H8V7z"></path>
+            <line x1="12" y1="2" x2="12" y2="4"></line>
+          </svg>
+        </span>
+        <!-- Close (X) Icon (visible when open) -->
+        <span class="chatbot-icon-opened" style="display:none">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </span>
+        <!-- Online green dot badge -->
+        <span class="chatbot-badge-dot" aria-hidden="true"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Embedded JavaScript Application -->
+  <script>
+/* ========================================================= */
+/* UYIR SCORE CLIENT APPLICATION                             */
+/* ========================================================= */
+
+// Utility: Escape dynamic HTML to prevent injection
+function esc(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Format INR in Lakh and Crore
+function formatINR(val) {
+  const num = Number(val) || 0;
+  const abs = Math.abs(num);
+  const sign = num < 0 ? "-" : "";
+  if (abs >= 10000000) {
+    return sign + "\u20B9" + (abs / 10000000).toFixed(2) + " crore";
+  } else if (abs >= 100000) {
+    return sign + "\u20B9" + (abs / 100000).toFixed(2) + " lakh";
+  } else {
+    return sign + "\u20B9" + Math.round(abs).toLocaleString("en-IN");
+  }
+}
+
+// Storage Keys
+const ANSWERS_STORAGE_KEY = "uyir_answers_v1";
+const RESULT_STORAGE_KEY = "uyir_result_v1";
+
+// Application State
+let state = {
+  // Question 1: Age (18-100)
+  age: 45,
+  // Question 2: Gender ('woman', 'man', 'prefer_not')
+  gender: "woman",
+  // Question 3: BMI
+  knowBmiDirect: false,
+  heightCm: 165,
+  weightKg: 68,
+  bmi: 25.0,
+  // Question 4: Blood sugar (Glucose, 40-300)
+  hasGlucose: "yes", // 'yes' or 'no'
+  glucose: 120,
+  // Question 5: Blood pressure (diastolic, 30-200)
+  bpOption: "skip", // 'yes' or 'skip'
+  bloodPressure: "",
+  // Question 6: Family history
+  familyHistory: "one", // 'no', 'one', 'two_plus', 'not_sure'
+  familyValue: 0.5,
+  // Question 7: Pregnancies (0-20)
+  pregnancies: 0,
+  pregCustom: false,
+  // Question 8: Lab values (Insulin, SkinThickness)
+  hasLabValues: "skip", // 'yes' or 'skip'
+  insulin: "",
+  skinThickness: "",
+  // Question 9: Reference label
+  label: ""
+};
+
+let currentResult = null;
+let returnToReview = false;
+let autoAdvanceTimer = null;
+
+const famLabels = {
+  no: "No close relatives",
+  one: "One close relative (parent / sibling)",
+  two_plus: "Two or more close relatives",
+  not_sure: "Not sure / Typical value"
+};
+
+const meanings = {
+  Low: "Your numbers suggest a lower chance of developing type 2 diabetes right now. Keep up your healthy everyday habits.",
+  Moderate: "Your numbers suggest an increased chance of developing diabetes. Simple everyday adjustments can make a big difference.",
+  High: "Your numbers suggest a high chance of developing diabetes. We strongly encourage you to consult a doctor soon for a formal blood check."
+};
+
+// Load persisted state
+function loadPersistedState() {
+  try {
+    const raw = sessionStorage.getItem(ANSWERS_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state = Object.assign({}, state, parsed);
+    }
+    const rawRes = sessionStorage.getItem(RESULT_STORAGE_KEY);
+    if (rawRes) {
+      currentResult = JSON.parse(rawRes);
+    }
+  } catch (e) {
+    console.warn("Storage read error:", e);
+  }
+}
+
+function persistState() {
+  try {
+    sessionStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn("Storage write error:", e);
+  }
+}
+
+function persistResult(res) {
+  try {
+    sessionStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(res));
+  } catch (e) {}
+}
+
+/* ========================================================= */
+/* THEME MANAGEMENT                                          */
+/* ========================================================= */
+function initTheme() {
+  try {
+    const saved = localStorage.getItem("uyir_theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const theme = saved || (prefersDark ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+    updateThemeIcon(theme);
+  } catch (e) {
+    updateThemeIcon("light");
+  }
+}
+
+function toggleTheme() {
+  try {
+    const current = document.documentElement.getAttribute("data-theme") || "light";
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("uyir_theme", next);
+    updateThemeIcon(next);
+  } catch (e) {}
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  if (theme === "dark") {
+    // Sun icon
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+  } else {
+    // Moon icon
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  }
+}
+
+/* ========================================================= */
+/* MOBILE MENU                                               */
+/* ========================================================= */
+function toggleMobileMenu() {
+  const menu = document.getElementById("mobile-menu");
+  const btn = document.getElementById("mobile-menu-btn");
+  if (!menu || !btn) return;
+  const isOpen = menu.classList.toggle("open");
+  btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+}
+
+function closeMobileMenu() {
+  const menu = document.getElementById("mobile-menu");
+  const btn = document.getElementById("mobile-menu-btn");
+  if (menu) menu.classList.remove("open");
+  if (btn) btn.setAttribute("aria-expanded", "false");
+}
+
+/* ========================================================= */
+/* ROUTING ENGINE                                            */
+/* ========================================================= */
+function handleRouting() {
+  try {
+    clearTimeout(autoAdvanceTimer);
+    closeMobileMenu();
+
+    const hash = window.location.hash || "#home";
+    const cleanHash = hash.split("?")[0];
+
+    // Highlight active nav item
+    const navLinks = document.querySelectorAll(".nav-link, .mobile-nav-link");
+    navLinks.forEach(link => {
+      const target = link.getAttribute("href");
+      if (cleanHash.startsWith(target)) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+
+    // Hide all section panels
+    const sections = document.querySelectorAll(".section-panel");
+    sections.forEach(sec => sec.classList.remove("active"));
+
+    // Route Dispatcher
+    if (cleanHash === "#home" || cleanHash === "") {
+      showPanel("page-home");
+    } else if (cleanHash.startsWith("#test")) {
+      showPanel("page-test");
+      routeTestSubviews(cleanHash);
+    } else if (cleanHash === "#guide") {
+      showPanel("page-guide");
+    } else if (cleanHash === "#help") {
+      showPanel("page-help");
+    } else if (cleanHash === "#clinics") {
+      showPanel("page-clinics");
+      loadClinicAnalytics();
+    } else if (cleanHash === "#about") {
+      showPanel("page-about");
+    } else {
+      showPanel("page-home");
+    }
+
+    // Toggle Static Viewport Mode (disables scrolling on #home, #help and question cards)
+    if (cleanHash === "#home" || cleanHash === "" || cleanHash === "#help" || (cleanHash.startsWith("#test") && cleanHash !== "#test/result")) {
+      document.body.classList.add("static-view");
+    } else {
+      document.body.classList.remove("static-view");
+    }
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (e) {
+    console.error("Routing error:", e);
+  }
+}
+
+function showPanel(id) {
+  const p = document.getElementById(id);
+  if (p) p.classList.add("active");
+}
+
+function routeTestSubviews(hash) {
+  const parts = hash.split("/");
+  const sub = parts[1] || "1";
+
+  if (sub === "review") {
+    renderReviewScreen();
+  } else if (sub === "result") {
+    renderResultScreen();
+  } else {
+    const qNum = parseInt(sub, 10) || 1;
+    // Check if Question 7 is skipped for men
+    if (qNum === 7 && (state.gender === "man" || state.gender === "prefer_not")) {
+      window.location.hash = "#test/8";
+      return;
+    }
+    renderQuestion(qNum);
+  }
+}
+
+/* ========================================================= */
+/* QUESTION RENDERERS                                        */
+/* ========================================================= */
+function announceScreen(text) {
+  const el = document.getElementById("screen-announcer");
+  if (el) el.textContent = text;
+}
+
+function renderQuestion(q) {
+  const mount = document.getElementById("test-card-mount");
+  if (!mount) return;
+
+  const totalQuestions = 9;
+  const pct = Math.round((q / totalQuestions) * 100);
+
+  let bodyHtml = "";
+  let isNextDisabled = false;
+  let nextLabel = returnToReview ? "Back to review" : "Next";
+
+  if (q === 1) {
+    announceScreen("Question 1 of 9: How old are you?");
+    const curAge = state.age || 45;
+    const isValid = curAge >= 18 && curAge <= 100;
+    isNextDisabled = !isValid;
+
+    bodyHtml = `
+      <h2 class="question-title">How old are you?</h2>
+      <p class="question-why">Risk of type 2 diabetes increases with age, especially after age 30 or 40.</p>
+
+      <div class="counter-box">
+        <button type="button" class="counter-btn" aria-label="Decrease age" onclick="adjustAge(-1)">-</button>
+        <div class="counter-input-wrap">
+          <input type="number" id="input-age" class="counter-input" min="18" max="100" value="${curAge}" oninput="onAgeInput(this.value)">
+        </div>
+        <button type="button" class="counter-btn" aria-label="Increase age" onclick="adjustAge(1)">+</button>
+      </div>
+
+      <div id="age-err" class="input-hint" style="text-align:center;color:var(--band-high);font-weight:600;min-height:20px">
+        ${!isValid ? "Please enter an age between 18 and 100." : ""}
+      </div>
+    `;
+  } else if (q === 2) {
+    announceScreen("Question 2 of 9: Are you a woman or a man?");
+    const g = state.gender || "woman";
+
+    bodyHtml = `
+      <h2 class="question-title">Are you a woman or a man?</h2>
+      <p class="question-why">Men and women experience different metabolic risk patterns.</p>
+
+      <div class="choices-stack">
+        <button type="button" class="choice-btn ${g === 'woman' ? 'selected' : ''}" onclick="selectGender('woman')">
+          <span>Woman</span>
+          <div class="choice-indicator">${g === 'woman' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${g === 'man' ? 'selected' : ''}" onclick="selectGender('man')">
+          <span>Man</span>
+          <div class="choice-indicator">${g === 'man' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${g === 'prefer_not' ? 'selected' : ''}" onclick="selectGender('prefer_not')">
+          <span>Prefer not to say</span>
+          <div class="choice-indicator">${g === 'prefer_not' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+      </div>
+
+      ${g !== 'woman' ? `
+        <div class="notice-card info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>This tool was built from health data on women, so your result is only a rough guide.</div>
+        </div>
+      ` : ''}
+    `;
+  } else if (q === 3) {
+    announceScreen("Question 3 of 9: What are your height and weight?");
+    const bmiVal = Number(state.bmi) || 25.0;
+    const isValid = bmiVal >= 10 && bmiVal <= 70;
+    isNextDisabled = !isValid;
+
+    let bmiCategory = "Typical (Indian guidance)";
+    let bmiColor = "var(--band-low)";
+    if (bmiVal < 18.5) {
+      bmiCategory = "Underweight";
+      bmiColor = "var(--band-mod)";
+    } else if (bmiVal >= 25.0) {
+      bmiCategory = "Higher risk (Indian guidance: 25 or more)";
+      bmiColor = "var(--band-high)";
+    } else if (bmiVal >= 23.0) {
+      bmiCategory = "Overweight (Indian guidance: 23 or more is overweight)";
+      bmiColor = "var(--band-mod)";
+    }
+
+    bodyHtml = `
+      <h2 class="question-title">What are your height and weight?</h2>
+      <p class="question-why">Higher body weight relative to height is one of the strongest modifiable factors for blood sugar.</p>
+
+      ${!state.knowBmiDirect ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+          <div class="input-group">
+            <label class="input-label" for="input-height">Height</label>
+            <div class="input-wrap-with-unit">
+              <input type="number" id="input-height" class="big-input" value="${state.heightCm || 165}" min="100" max="250" oninput="onHeightWeightInput()">
+              <span class="input-unit">cm</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="input-weight">Weight</label>
+            <div class="input-wrap-with-unit">
+              <input type="number" id="input-weight" class="big-input" value="${state.weightKg || 68}" min="30" max="200" oninput="onHeightWeightInput()">
+              <span class="input-unit">kg</span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right;margin-top:2px">
+          <button type="button" class="btn-subtle" onclick="toggleBmiDirect(true)">I already know my BMI</button>
+        </div>
+      ` : `
+        <div class="input-group">
+          <label class="input-label" for="input-direct-bmi">Body Mass Index (BMI)</label>
+          <div class="input-wrap-with-unit">
+            <input type="number" step="0.1" id="input-direct-bmi" class="big-input" value="${state.bmi || 25.0}" min="10" max="70" oninput="onDirectBmiInput(this.value)">
+            <span class="input-unit">kg/m&#178;</span>
+          </div>
+        </div>
+        <div style="text-align:right;margin-top:2px">
+          <button type="button" class="btn-subtle" onclick="toggleBmiDirect(false)">Calculate from height and weight</button>
+        </div>
+      `}
+
+      <!-- Live BMI Banner -->
+      <div class="bmi-live-banner">
+        <div class="bmi-indicator-dot" style="background:${bmiColor}"></div>
+        <div class="bmi-live-text">
+          Your BMI is <strong>${bmiVal.toFixed(1)}</strong> (${bmiCategory}).
+        </div>
+      </div>
+    `;
+  } else if (q === 4) {
+    announceScreen("Question 4 of 9: Do you have a recent blood sugar reading?");
+    const hasG = state.hasGlucose || "yes";
+    const gVal = Number(state.glucose) || 120;
+    const isValid = hasG === "yes" && gVal >= 40 && gVal <= 300;
+    isNextDisabled = !isValid;
+
+    bodyHtml = `
+      <h2 class="question-title">Do you have a recent blood sugar reading?</h2>
+      <p class="question-why">Blood sugar levels directly reflect how effectively your body processes glucose.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-bottom:var(--space-4)">
+        <button type="button" class="choice-btn ${hasG === 'yes' ? 'selected' : ''}" onclick="toggleGlucoseOption('yes')">
+          <span>Yes, I have one</span>
+          <div class="choice-indicator">${hasG === 'yes' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${hasG === 'no' ? 'selected' : ''}" onclick="toggleGlucoseOption('no')">
+          <span>No reading yet</span>
+          <div class="choice-indicator">${hasG === 'no' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+      </div>
+
+      ${hasG === 'yes' ? `
+        <div class="input-group">
+          <label class="input-label" for="input-glucose">Plasma glucose reading</label>
+          <div class="input-wrap-with-unit">
+            <input type="number" id="input-glucose" class="big-input" value="${state.glucose || 120}" min="40" max="300" oninput="onGlucoseInput(this.value)">
+            <span class="input-unit">mg/dL</span>
+          </div>
+          <div class="input-hint">
+            A reading taken 2 hours after a glucose drink. Under 140 is typical (for reference only). If you only have a fasting or after-meal value, treat the result as a rough guide.
+          </div>
+        </div>
+      ` : `
+        <div class="card" style="background:var(--bg-subtle);margin-top:var(--space-3)">
+          <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:8px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <h3 style="font-size:15px;font-weight:700;margin:0">Where to get tested in India</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-main);line-height:1.5;margin-bottom:12px">
+            Visit your nearest <strong>Primary Health Centre (PHC)</strong>, Ayushman Arogya Mandir, government hospital, or local laboratory. Request a fasting blood glucose and HbA1c test. Many government health centres screen for free (services vary by state).
+          </p>
+          <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+            <button type="button" class="btn-primary" style="font-size:13.5px;padding:8px 16px" onclick="toggleGlucoseOption('yes')">I have my reading now</button>
+            <a href="#guide" class="btn-subtle">Read the health guide</a>
+          </div>
+        </div>
+      `}
+    `;
+  } else if (q === 5) {
+    announceScreen("Question 5 of 9: Do you know your blood pressure?");
+    const bpOpt = state.bpOption || "skip";
+    const bpVal = state.bloodPressure;
+    const isValid = bpOpt === "skip" || (Number(bpVal) >= 30 && Number(bpVal) <= 200);
+    isNextDisabled = !isValid;
+
+    bodyHtml = `
+      <h2 class="question-title">Do you know your blood pressure?</h2>
+      <p class="question-why">High blood pressure often occurs alongside high blood sugar and affects heart and vessel health.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-bottom:var(--space-4)">
+        <button type="button" class="choice-btn ${bpOpt === 'yes' ? 'selected' : ''}" onclick="toggleBpOption('yes')">
+          <span>Yes, I know it</span>
+          <div class="choice-indicator">${bpOpt === 'yes' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${bpOpt === 'skip' ? 'selected' : ''}" onclick="toggleBpOption('skip')">
+          <span>I don't know / skip</span>
+          <div class="choice-indicator">${bpOpt === 'skip' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+      </div>
+
+      ${bpOpt === 'yes' ? `
+        <div class="input-group">
+          <label class="input-label" for="input-bp">Diastolic blood pressure (lower number)</label>
+          <div class="input-wrap-with-unit">
+            <input type="number" id="input-bp" class="big-input" value="${state.bloodPressure || ''}" placeholder="e.g. 78" min="30" max="200" oninput="onBpInput(this.value)">
+            <span class="input-unit">mmHg</span>
+          </div>
+          <div class="input-hint">
+            Enter the lower number (diastolic). Under 80 mmHg is typical for reference.
+          </div>
+        </div>
+      ` : `
+        <div class="notice-card info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>No problem! A typical baseline number (72 mmHg) will be used automatically.</div>
+        </div>
+      `}
+    `;
+  } else if (q === 6) {
+    announceScreen("Question 6 of 9: Do any close family members have diabetes?");
+    const fam = state.familyHistory || "not_sure";
+
+    bodyHtml = `
+      <h2 class="question-title">Do any close family members have diabetes?</h2>
+      <p class="question-why">Genetics and shared family lifestyle play an important role in diabetes risk.</p>
+
+      <div class="choices-stack">
+        <button type="button" class="choice-btn ${fam === 'no' ? 'selected' : ''}" onclick="selectFamilyHistory('no', 0.2)">
+          <span>No</span>
+          <div class="choice-indicator">${fam === 'no' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${fam === 'one' ? 'selected' : ''}" onclick="selectFamilyHistory('one', 0.5)">
+          <span>One parent, brother or sister</span>
+          <div class="choice-indicator">${fam === 'one' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${fam === 'two_plus' ? 'selected' : ''}" onclick="selectFamilyHistory('two_plus', 0.9)">
+          <span>Two or more close relatives</span>
+          <div class="choice-indicator">${fam === 'two_plus' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+
+        <button type="button" class="choice-btn ${fam === 'not_sure' ? 'selected' : ''}" onclick="selectFamilyHistory('not_sure', '')">
+          <span>Not sure / skip</span>
+          <div class="choice-indicator">${fam === 'not_sure' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+        </button>
+      </div>
+    `;
+  } else if (q === 7) {
+    announceScreen("Question 7 of 9: How many times have you been pregnant?");
+    const curP = state.pregnancies !== undefined && state.pregnancies !== "" ? Number(state.pregnancies) : 0;
+    const isAbove3 = curP >= 4 || state.pregCustom;
+    const isCustomValid = !isAbove3 || (curP >= 4 && curP <= 20);
+    isNextDisabled = !isCustomValid;
+
+    bodyHtml = `
+      <h2 class="question-title">How many times have you been pregnant?</h2>
+      <p class="question-why">Pregnancy can cause temporary gestational diabetes, which increases future risk.</p>
+
+      <div class="num-buttons-grid">
+        ${[0, 1, 2, 3].map(n => `
+          <button type="button" class="num-btn ${curP === n && !isAbove3 ? 'selected' : ''}" onclick="selectPregnancies(${n})">${n}</button>
+        `).join("")}
+        <button type="button" class="num-btn ${isAbove3 ? 'selected' : ''}" onclick="selectPregCustom()">4 or more</button>
+      </div>
+
+      ${isAbove3 ? `
+        <div class="input-group" style="margin-top:var(--space-3)">
+          <label class="input-label" for="input-preg">Enter exact number of pregnancies (4 or more)</label>
+          <div style="display:flex;align-items:center;gap:10px;max-width:320px">
+            <input type="number" id="input-preg" class="big-input" value="${curP >= 4 ? curP : 4}" min="4" max="20" placeholder="e.g. 4" oninput="onPregInput(this.value)" onkeydown="if(event.key==='Enter') navigateNext(7)">
+          </div>
+          <div id="preg-hint" class="input-hint" style="color:${isCustomValid ? 'var(--text-dim)' : 'var(--band-high)'}">
+            ${isCustomValid ? 'Allowed range: 4 to 20 pregnancies.' : 'Please enter a number between 4 and 20.'}
+          </div>
+        </div>
+      ` : ''}
+    `;
+  } else if (q === 8) {
+    announceScreen("Question 8 of 9: Do you have lab reports with these values?");
+    const hasLab = state.hasLabValues || "skip";
+
+    bodyHtml = `
+      <h2 class="question-title">Do you have lab reports with these values?</h2>
+      <p class="question-why">These detailed lab tests refine the estimate, but typical numbers are used if you don't have them.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-5)">
+        <div class="input-group">
+          <label class="input-label" for="input-insulin">Serum insulin (2-hour)</label>
+          <div class="input-wrap-with-unit">
+            <input type="number" id="input-insulin" class="big-input" value="${state.insulin || ''}" placeholder="Optional" min="10" max="900" oninput="onInsulinInput(this.value)">
+            <span class="input-unit">uU/mL</span>
+          </div>
+          <div class="input-hint">Typical reference: 16 to 166 uU/mL</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="input-skin">Triceps skinfold</label>
+          <div class="input-wrap-with-unit">
+            <input type="number" id="input-skin" class="big-input" value="${state.skinThickness || ''}" placeholder="Optional" min="5" max="100" oninput="onSkinInput(this.value)">
+            <span class="input-unit">mm</span>
+          </div>
+          <div class="input-hint">Typical reference: 10 to 30 mm</div>
+        </div>
+      </div>
+
+      <div style="text-align:center">
+        <button type="button" class="btn-secondary" style="width:100%;max-width:320px" onclick="skipLabReports()">Skip - I don't have these</button>
+      </div>
+    `;
+  } else if (q === 9) {
+    announceScreen("Question 9 of 9: Anything to note? (optional)");
+
+    bodyHtml = `
+      <h2 class="question-title">Anything to note? (optional)</h2>
+      <p class="question-why">An optional reference note for yourself if you save or print this report.</p>
+
+      <div class="input-group">
+        <label class="input-label" for="input-label">Reference note (e.g. Morning check)</label>
+        <input type="text" id="input-label" class="big-input" value="${esc(state.label || '')}" placeholder="e.g. Self check" maxlength="60" oninput="onLabelInput(this.value)">
+        <div class="input-hint">Please do not type your real name.</div>
+      </div>
+
+      <div class="notice-card warning" style="margin-top:var(--space-4)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div><strong>Privacy Reminder</strong>: Uyir Score preserves your privacy. Keep this note impersonal.</div>
+      </div>
+    `;
+    nextLabel = "Check your answers";
+  }
+
+  mount.innerHTML = `
+    <div class="test-card">
+      <div class="test-progress-wrap">
+        <div class="progress-meta">
+          <span class="progress-step">Question ${q} of ${totalQuestions}</span>
+          <span style="font-size:12.5px;color:var(--text-dim);font-weight:600">${pct}% complete</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuenow="${q}" aria-valuemin="1" aria-valuemax="${totalQuestions}">
+          <div class="progress-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+
+      ${bodyHtml}
+
+      <div class="test-nav-bar">
+        <button type="button" class="btn-secondary" onclick="navigateBack(${q})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Back</span>
+        </button>
+
+        <button type="button" id="btn-next" class="btn-primary" ${isNextDisabled ? 'disabled' : ''} onclick="navigateNext(${q})">
+          <span>${nextLabel}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/* Question 1 Handlers */
+function adjustAge(delta) {
+  let val = (Number(state.age) || 45) + delta;
+  if (val < 18) val = 18;
+  if (val > 100) val = 100;
+  state.age = val;
+  persistState();
+  renderQuestion(1);
+}
+function onAgeInput(val) {
+  const num = parseInt(val, 10);
+  state.age = isNaN(num) ? "" : num;
+  persistState();
+  const isValid = state.age >= 18 && state.age <= 100;
+  const btn = document.getElementById("btn-next");
+  if (btn) btn.disabled = !isValid;
+  const err = document.getElementById("age-err");
+  if (err) err.textContent = isValid ? "" : "Please enter an age between 18 and 100.";
+}
+
+/* Question 2 Handlers */
+function selectGender(g) {
+  state.gender = g;
+  persistState();
+  renderQuestion(2);
+  clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = setTimeout(() => {
+    navigateNext(2);
+  }, 300);
+}
+
+/* Question 3 Handlers */
+function toggleBmiDirect(direct) {
+  state.knowBmiDirect = direct;
+  persistState();
+  renderQuestion(3);
+}
+function onHeightWeightInput() {
+  const h = Number(document.getElementById("input-height").value) || 165;
+  const w = Number(document.getElementById("input-weight").value) || 68;
+  state.heightCm = h;
+  state.weightKg = w;
+  const hM = h / 100;
+  const calculatedBmi = Math.round((w / (hM * hM)) * 10) / 10;
+  state.bmi = calculatedBmi;
+  persistState();
+  renderQuestion(3);
+}
+function onDirectBmiInput(val) {
+  state.bmi = Number(val) || 25.0;
+  persistState();
+  renderQuestion(3);
+}
+
+/* Question 4 Handlers */
+function toggleGlucoseOption(opt) {
+  state.hasGlucose = opt;
+  persistState();
+  renderQuestion(4);
+}
+function onGlucoseInput(val) {
+  state.glucose = Number(val);
+  persistState();
+  const isValid = state.glucose >= 40 && state.glucose <= 300;
+  const btn = document.getElementById("btn-next");
+  if (btn) btn.disabled = !isValid;
+}
+
+/* Question 5 Handlers */
+function toggleBpOption(opt) {
+  state.bpOption = opt;
+  if (opt === "skip") {
+    state.bloodPressure = "";
+    persistState();
+    clearTimeout(autoAdvanceTimer);
+    autoAdvanceTimer = setTimeout(() => {
+      navigateNext(5);
+    }, 300);
+  } else {
+    persistState();
+    renderQuestion(5);
+  }
+}
+function onBpInput(val) {
+  state.bloodPressure = val === "" ? "" : Number(val);
+  persistState();
+  const isValid = val === "" || (Number(val) >= 30 && Number(val) <= 200);
+  const btn = document.getElementById("btn-next");
+  if (btn) btn.disabled = !isValid;
+}
+
+/* Question 6 Handlers */
+// rough approximation mapping for family history pedigree, needs expert review
+function selectFamilyHistory(choice, mappedVal) {
+  state.familyHistory = choice;
+  state.familyValue = mappedVal;
+  persistState();
+  renderQuestion(6);
+  clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = setTimeout(() => {
+    navigateNext(6);
+  }, 300);
+}
+
+/* Question 7 Handlers */
+function selectPregnancies(n) {
+  state.pregCustom = false;
+  state.pregnancies = n;
+  persistState();
+  renderQuestion(7);
+  clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = setTimeout(() => {
+    navigateNext(7);
+  }, 300);
+}
+function selectPregCustom() {
+  state.pregCustom = true;
+  if (state.pregnancies < 4 || state.pregnancies > 20) {
+    state.pregnancies = 4;
+  }
+  persistState();
+  renderQuestion(7);
+  setTimeout(() => {
+    const el = document.getElementById("input-preg");
+    if (el) { el.focus(); el.select(); }
+  }, 50);
+}
+function onPregInput(val) {
+  const num = parseInt(val, 10);
+  const isValid = !isNaN(num) && num >= 4 && num <= 20;
+  if (!isNaN(num)) {
+    state.pregnancies = num;
+  } else {
+    state.pregnancies = "";
+  }
+  persistState();
+  const btn = document.getElementById("btn-next");
+  if (btn) btn.disabled = !isValid;
+  const hint = document.getElementById("preg-hint");
+  if (hint) {
+    hint.textContent = isValid ? "Allowed range: 4 to 20 pregnancies." : "Please enter a number between 4 and 20.";
+    hint.style.color = isValid ? "var(--text-dim)" : "var(--band-high)";
+  }
+}
+
+/* Question 8 Handlers */
+function skipLabReports() {
+  state.hasLabValues = "skip";
+  state.insulin = "";
+  state.skinThickness = "";
+  persistState();
+  navigateNext(8);
+}
+function onInsulinInput(val) {
+  state.insulin = val === "" ? "" : Number(val);
+  state.hasLabValues = "yes";
+  persistState();
+}
+function onSkinInput(val) {
+  state.skinThickness = val === "" ? "" : Number(val);
+  state.hasLabValues = "yes";
+  persistState();
+}
+
+/* Question 9 Handlers */
+function onLabelInput(val) {
+  state.label = val;
+  persistState();
+}
+
+/* Navigation Helpers */
+function navigateBack(q) {
+  if (returnToReview) {
+    window.location.hash = "#test/review";
+    return;
+  }
+  if (q === 1) {
+    window.location.hash = "#home";
+  } else if (q === 8 && (state.gender === "man" || state.gender === "prefer_not")) {
+    window.location.hash = "#test/6";
+  } else {
+    window.location.hash = "#test/" + (q - 1);
+  }
+}
+
+function navigateNext(q) {
+  if (returnToReview) {
+    window.location.hash = "#test/review";
+    return;
+  }
+  if (q === 6 && (state.gender === "man" || state.gender === "prefer_not")) {
+    window.location.hash = "#test/8";
+  } else if (q === 9) {
+    window.location.hash = "#test/review";
+  } else {
+    window.location.hash = "#test/" + (q + 1);
+  }
+}
+
+// Enter Key navigation
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const btn = document.getElementById("btn-next");
+    if (btn && !btn.disabled) {
+      btn.click();
+    }
+  }
+});
+
+/* ========================================================= */
+/* REVIEW SCREEN (#test/review)                              */
+/* ========================================================= */
+function editQuestion(q) {
+  returnToReview = true;
+  window.location.hash = "#test/" + q;
+}
+
+function renderReviewScreen() {
+  const mount = document.getElementById("test-card-mount");
+  if (!mount) return;
+
+  announceScreen("Check your answers review screen");
+  returnToReview = false;
+
+  // Validate all fields
+  const age = Number(state.age);
+  const bmi = Number(state.bmi);
+  const glucose = Number(state.glucose);
+
+  const errors = [];
+  if (!age || age < 18 || age > 100) errors.push("Age must be between 18 and 100.");
+  if (!bmi || bmi < 10 || bmi > 70) errors.push("BMI must be between 10 and 70.");
+  if (!glucose || glucose < 40 || glucose > 300) errors.push("Blood sugar must be between 40 and 300 mg/dL.");
+
+  const famLabels = {
+    no: "No close relatives",
+    one: "One parent, brother or sister",
+    two_plus: "Two or more close relatives",
+    not_sure: "Not provided (typical value will be used)"
+  };
+
+  const isMaleOrOther = state.gender === "man" || state.gender === "prefer_not";
+
+  mount.innerHTML = `
+    <div class="test-card">
+      <h2 class="question-title">Check your answers</h2>
+      <p class="question-why">Review your information before generating your health risk estimate. You can edit any question.</p>
+
+      ${errors.length > 0 ? `
+        <div class="notice-card emergency">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Please fix the following before proceeding:</strong>
+            <ul style="padding-left:18px;margin-top:4px">
+              ${errors.map(err => `<li>${esc(err)}</li>`).join("")}
+            </ul>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="review-answers-list">
+        <!-- 1. Age -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">1. Age</div>
+            <div class="review-item-val">${state.age ? state.age + " years" : '<span class="blank-note">Missing</span>'}</div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(1)">Edit</button>
+        </div>
+
+        <!-- 2. Gender -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">2. Gender / Sex</div>
+            <div class="review-item-val">${state.gender === 'woman' ? 'Woman' : (state.gender === 'man' ? 'Man' : 'Prefer not to say')}</div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(2)">Edit</button>
+        </div>
+
+        <!-- 3. Body measurements -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">3. Body measurements</div>
+            <div class="review-item-val">
+              BMI: ${state.bmi ? Number(state.bmi).toFixed(1) : ''} kg/m&#178;
+              ${!state.knowBmiDirect ? `(${state.heightCm || 165} cm, ${state.weightKg || 68} kg)` : ''}
+            </div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(3)">Edit</button>
+        </div>
+
+        <!-- 4. Blood sugar -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">4. Plasma glucose (2-hour)</div>
+            <div class="review-item-val">${state.glucose ? state.glucose + " mg/dL" : '<span class="blank-note">Required</span>'}</div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(4)">Edit</button>
+        </div>
+
+        <!-- 5. Blood pressure -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">5. Diastolic blood pressure</div>
+            <div class="review-item-val">${state.bloodPressure ? state.bloodPressure + " mmHg" : '<span class="blank-note">Typical value (72 mmHg) will be used</span>'}</div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(5)">Edit</button>
+        </div>
+
+        <!-- 6. Family history -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">6. Family history</div>
+            <div class="review-item-val">${famLabels[state.familyHistory] || 'Typical value will be used'}</div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(6)">Edit</button>
+        </div>
+
+        <!-- 7. Pregnancies -->
+        ${!isMaleOrOther ? `
+          <div class="review-item">
+            <div class="review-item-main">
+              <div class="review-item-label">7. Pregnancies</div>
+              <div class="review-item-val">${state.pregnancies !== undefined && state.pregnancies !== '' ? state.pregnancies : 0}</div>
+            </div>
+            <button type="button" class="btn-subtle" onclick="editQuestion(7)">Edit</button>
+          </div>
+        ` : ''}
+
+        <!-- 8. Lab reports -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">8. Detailed lab reports</div>
+            <div class="review-item-val">
+              Insulin: ${state.insulin ? state.insulin + ' uU/mL' : 'Typical value'},
+              Skinfold: ${state.skinThickness ? state.skinThickness + ' mm' : 'Typical value'}
+            </div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(8)">Edit</button>
+        </div>
+
+        <!-- 9. Reference note -->
+        <div class="review-item">
+          <div class="review-item-main">
+            <div class="review-item-label">9. Reference note</div>
+            <div class="review-item-val">${state.label ? esc(state.label) : '<span class="blank-note">None</span>'}</div>
+          </div>
+          <button type="button" class="btn-subtle" onclick="editQuestion(9)">Edit</button>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:var(--space-6)">
+        <button type="button" class="btn-primary" style="font-size:18px;padding:16px 36px" ${errors.length > 0 ? 'disabled' : ''} onclick="calculateFinalResult()">
+          <span>See my result</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/* ========================================================= */
+/* CALCULATION & RESULT SCREEN                               */
+/* ========================================================= */
+async function calculateFinalResult() {
+  const mount = document.getElementById("test-card-mount");
+  if (!mount) return;
+
+  mount.innerHTML = `
+    <div class="test-card loading-box">
+      <div class="spinner"></div>
+      <h3 style="font-size:22px;font-weight:800;margin-bottom:8px">Working on your result...</h3>
+      <p style="font-size:14px;color:var(--text-muted)">Evaluating your health numbers and generating your plain-language explanation.</p>
+    </div>
+  `;
+
+  // Prepare payload
+  const isMaleOrOther = state.gender === "man" || state.gender === "prefer_not";
+  const payload = {
+    Age: state.age,
+    BMI: state.bmi,
+    Glucose: state.glucose,
+    BloodPressure: state.bloodPressure !== "" ? state.bloodPressure : null,
+    SkinThickness: state.skinThickness !== "" ? state.skinThickness : null,
+    Insulin: state.insulin !== "" ? state.insulin : null,
+    DiabetesPedigreeFunction: state.familyValue !== "" ? state.familyValue : null,
+    Pregnancies: !isMaleOrOther && state.pregnancies !== "" ? state.pregnancies : null,
+    label: state.label || ""
+  };
+
+  try {
+    const res = await fetch("/api/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Server returned " + res.status);
+    }
+
+    const data = await res.json();
+    currentResult = data;
+    persistResult(data);
+    window.location.hash = "#test/result";
+  } catch (err) {
+    console.error("Prediction error:", err);
+    mount.innerHTML = `
+      <div class="test-card" style="text-align:center;padding:var(--space-6)">
+        <div class="notice-card emergency" style="justify-content:center;margin-bottom:var(--space-5)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>Unable to calculate result:</strong> ${esc(err.message)}</div>
+        </div>
+        <button type="button" class="btn-primary" onclick="renderReviewScreen()">Back to review</button>
+      </div>
+    `;
+  }
+}
+
+function renderResultScreen() {
+  const mount = document.getElementById("test-card-mount");
+  if (!mount) return;
+
+  if (!currentResult) {
+    mount.innerHTML = `
+      <div class="test-card" style="text-align:center;padding:var(--space-6)">
+        <h2 class="question-title">No result yet</h2>
+        <p class="question-why">Please complete the questions to view your estimated diabetes risk.</p>
+        <a href="#test/1" class="btn-primary">Start the test</a>
+      </div>
+    `;
+    return;
+  }
+
+  announceScreen("Your screening result");
+  const d = currentResult;
+  const pPct = Math.round(d.risk * 100);
+  const band = d.band || "Low";
+
+  // Meanings
+  const meanings = {
+    Low: "Your numbers suggest a lower chance of developing type 2 diabetes right now. Keep up your healthy everyday habits.",
+    Moderate: "Your numbers suggest an increased chance of developing diabetes. Simple everyday adjustments can make a big difference.",
+    High: "Your numbers suggest a high chance of developing diabetes. We strongly encourage you to consult a doctor soon for a formal blood check."
+  };
+
+  // Explanation split
+  let explanationText = d.explanation || "";
+  let recsText = "";
+  if (explanationText.includes("Recommendations:")) {
+    const parts = explanationText.split("Recommendations:");
+    explanationText = parts[0].trim();
+    recsText = parts[1].trim();
+  }
+
+  // Factor Rows
+  const drv = d.drivers || [];
+  const maxFactorRows = drv.slice(0, 5);
+
+  mount.innerHTML = `
+    <div class="result-layout">
+      <!-- Top Action Bar -->
+      <div class="result-top-bar">
+        <button type="button" class="btn-secondary" onclick="resetAndRestart()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          <span>Take the test again</span>
+        </button>
+
+        <div style="display:flex;gap:var(--space-2)">
+          <button type="button" id="btn-copy" class="btn-subtle" onclick="copyResultSummary()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="btn-copy-label">Copy summary</span>
+          </button>
+
+          <button type="button" class="btn-subtle" onclick="openReportModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Print my result</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Result Card -->
+      <div class="card result-hero-card">
+        <!-- Semicircle Gauge -->
+        <div class="gauge-box">
+          <svg class="gauge-svg" viewBox="0 0 200 108">
+            <path d="M 25 95 A 75 75 0 0 1 65.95 28.17" class="gauge-arc arc-low" stroke-width="14" fill="none"/>
+            <path d="M 65.95 28.17 A 75 75 0 0 1 134.05 28.17" class="gauge-arc arc-mod" stroke-width="14" fill="none"/>
+            <path d="M 134.05 28.17 A 75 75 0 0 1 175 95" class="gauge-arc arc-high" stroke-width="14" fill="none"/>
+            <g id="needle-group" class="gauge-needle">
+              <line x1="100" y1="95" x2="100" y2="30" class="needle-line" stroke-width="3.5" stroke-linecap="round"/>
+              <circle cx="100" cy="95" r="7" class="needle-pivot"/>
+              <circle cx="100" cy="95" r="3" class="needle-dot"/>
+            </g>
+          </svg>
+          <div class="gauge-center-text">
+            <div id="gauge-count-text" class="gauge-percentage">0%</div>
+            <div class="gauge-sublabel">estimated risk</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:var(--space-2)">
+          <span class="pill pill-${band}">${band} risk</span>
+        </div>
+
+        <div class="result-meaning">
+          ${meanings[band] || meanings.Low}
+        </div>
+
+        <!-- Emergency / Clinical Alert for High Risk -->
+        ${band === 'High' ? `
+          <div class="alert-card-emergency" style="margin:var(--space-5) 0 0;text-align:left">
+            <div class="emergency-header">
+              <span class="emergency-badge">Recommended Next Step</span>
+              <h3 style="font-size:17px;font-weight:800;color:var(--band-high-text);margin:0">When to get help</h3>
+            </div>
+            <p style="font-size:13.5px;color:var(--text-main);line-height:1.55;margin-bottom:8px">
+              Because your score falls in the high range, please visit a nearby <strong>Primary Health Centre (PHC)</strong>, Ayushman Arogya Mandir, or doctor for a fasting blood sugar and HbA1c test.
+            </p>
+            <p style="font-size:13px;color:var(--text-dim);margin:0">
+              If you experience severe acute symptoms like chest pain, difficulty breathing, or confusion, call <strong>108</strong> or <strong>112</strong> immediately.
+            </p>
+            <div style="margin-top:10px">
+              <a href="#help" class="btn-subtle" style="color:var(--logo-red);border-color:var(--logo-red)">Read emergency guidance</a>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- 3 Stacked Cards -->
+      <div class="result-cards-stack">
+        <!-- 1. What affects your result -->
+        <div class="card card-hover">
+          <div class="subcard-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>What affects your result</span>
+          </div>
+
+          ${maxFactorRows.map(f => {
+            const isRaises = f.impact > 0;
+            const pctImpact = Math.min(100, Math.round(Math.abs(f.impact) * 200));
+            return `
+              <div class="factor-row">
+                <div class="factor-header">
+                  <span>${esc(f.label)} (${f.value})</span>
+                  <span style="color:${isRaises ? 'var(--band-high)' : 'var(--band-low)'}">
+                    ${isRaises ? 'Raises risk' : 'Lowers risk'}
+                  </span>
+                </div>
+                <div class="factor-track">
+                  <div class="factor-fill ${isRaises ? 'raises' : 'lowers'}" style="width:${pctImpact}%"></div>
+                </div>
+              </div>
+            `;
+          }).join("")}
+
+          ${d.filled && d.filled.length > 0 ? `
+            <div class="chips-row">
+              <span style="font-size:12px;color:var(--text-dim);display:flex;align-items:center">Typical values were used for:</span>
+              ${d.filled.map(item => `<span class="chip-item">${esc(item)}</span>`).join("")}
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- 2. In plain words -->
+        <div class="card card-hover">
+          <div class="subcard-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>In plain words</span>
+          </div>
+          <p style="font-size:14.5px;color:var(--text-main);line-height:1.6;margin:0">
+            ${esc(explanationText)}
+          </p>
+        </div>
+
+        <!-- 3. What you can do -->
+        <div class="card card-hover">
+          <div class="subcard-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>What you can do</span>
+          </div>
+
+          <div class="checklist-item">
+            <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><strong>Walk 30 minutes 5 days a week</strong>: Regular physical activity helps your muscles use glucose effectively.</div>
+          </div>
+
+          <div class="checklist-item">
+            <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><strong>Choose whole grains and millets</strong>: Enjoy traditional ragi, jowar, or bajra instead of refined maida or polished white rice.</div>
+          </div>
+
+          <div class="checklist-item">
+            <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><strong>Cut back on sweets and sugary chai</strong>: Drink water, buttermilk, or unsweetened tea to prevent sharp blood sugar spikes.</div>
+          </div>
+
+          <div class="checklist-item">
+            <div class="checklist-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><strong>Ask for blood sugar tests at a clinic</strong>: Request fasting blood sugar and HbA1c tests at a Primary Health Centre.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footnote on research sample -->
+      <footer class="footer-disclaimer" style="margin-top:var(--space-6)">
+        Built from a research sample of 768 women of Pima heritage in Arizona, USA, so it is a rough guide for Indian adults. Confirm with a blood test.
+      </footer>
+    </div>
+  `;
+
+  // Animate Gauge needle & counter
+  setTimeout(() => {
+    const needle = document.getElementById("needle-group");
+    if (needle) {
+      // 0% = -90deg, 100% = +90deg
+      const angle = (d.risk * 180) - 90;
+      needle.style.transform = `rotate(${angle}deg)`;
+    }
+
+    const countEl = document.getElementById("gauge-count-text");
+    if (countEl) {
+      let current = 0;
+      const target = pPct;
+      const step = Math.max(1, Math.floor(target / 25));
+      const interval = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(interval);
+        }
+        countEl.textContent = current + "%";
+      }, 30);
+    }
+  }, 100);
+
+  populateReportSheet();
+}
+
+function resetAndRestart() {
+  state.label = "";
+  persistState();
+  window.location.hash = "#test/1";
+}
+
+function copyResultSummary() {
+  if (!currentResult) return;
+  const d = currentResult;
+  const summary = `Uyir Score Screening Result:
+Estimated Risk: ${Math.round(d.risk * 100)}% (${d.band} risk)
+Summary: ${d.explanation || ''}
+Disclaimer: General information only, not a diagnosis. Confirm with a lab test.`;
+
+  navigator.clipboard.writeText(summary).then(() => {
+    const label = document.getElementById("btn-copy-label");
+    if (label) {
+      label.textContent = "Copied!";
+      setTimeout(() => { label.textContent = "Copy summary"; }, 2000);
+    }
+  }).catch(() => {
+    alert("Copied to clipboard!");
+  });
+}
+
+function generateReportText() {
+  if (!currentResult) return "";
+  const d = currentResult;
+  const isMaleOrOther = state.gender === "man" || state.gender === "prefer_not";
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  const timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+  let text = `================================================================================
+                    UYIR SCORE HEALTH SCREENING REPORT
+           Type 2 Diabetes Risk Assessment - Clinical Guidance for India
+================================================================================
+Generated On:   ${dateStr}, ${timeStr}
+Reference Note: ${state.label || 'Personal Screening'}
+
+1. SCREENING OUTCOME
+--------------------------------------------------------------------------------
+Estimated Diabetes Risk: ${Math.round(d.risk * 100)}%
+Risk Category:           ${d.band.toUpperCase()} RISK
+Clinical Meaning:        ${meanings[d.band] || ''}
+
+2. RECORDED HEALTH NUMBERS
+--------------------------------------------------------------------------------
+Age:                     ${state.age || 45} years
+Gender / Sex:            ${state.gender === 'woman' ? 'Woman' : (state.gender === 'man' ? 'Man' : 'Prefer not to say')}
+Body Mass Index (BMI):   ${state.bmi || 25.0} kg/m2
+Fasting Blood Sugar:     ${state.glucose ? state.glucose + ' mg/dL' : 'Typical value used (120 mg/dL)'}
+Diastolic Blood Pressure:${state.bloodPressure ? state.bloodPressure + ' mmHg' : 'Typical value used (72 mmHg)'}
+Family History:          ${famLabels[state.familyHistory] || 'Typical value used'}
+${!isMaleOrOther ? `Pregnancies:             ${state.pregnancies !== undefined && state.pregnancies !== '' ? state.pregnancies : 0}\n` : ''}Insulin (2-hr):          ${state.insulin ? state.insulin + ' uU/mL' : 'Typical value used'}
+Triceps Skinfold:        ${state.skinThickness ? state.skinThickness + ' mm' : 'Typical value used'}
+
+3. KEY CONTRIBUTING HEALTH FACTORS
+--------------------------------------------------------------------------------
+${(d.drivers || []).map(drv => `* ${drv.label}: ${drv.impact > 0 ? 'Raises risk by ' : 'Lowers risk by '}${Math.round(Math.abs(drv.impact) * 100)} points (Recorded: ${drv.value})`).join('\n')}
+
+4. CLINICAL RECOMMENDATIONS & EVERYDAY HABITS
+--------------------------------------------------------------------------------
+${d.explanation || ''}
+
+5. PRIMARY HEALTHCARE & EMERGENCY CONTACTS (INDIA)
+--------------------------------------------------------------------------------
+* Community Care: Visit your nearby Primary Health Centre (PHC) or Ayushman
+  Arogya Mandir for free blood pressure and fasting blood glucose testing.
+* Emergency Helpline: In case of acute symptoms such as severe chest
+  pain, shortness of breath, or confusion, dial 108 or 112 immediately.
+
+6. OFFICIAL CLINICAL DISCLAIMER
+--------------------------------------------------------------------------------
+This report provides risk estimation for educational and community screening
+purposes only. It is NOT a medical diagnosis. Only a qualified physician can
+diagnose diabetes or prediabetes. Always verify screening results with an
+accredited laboratory fasting blood sugar or HbA1c test.
+================================================================================`;
+  return text;
+}
+
+function populateReportSheet() {
+  if (!currentResult) return;
+  const d = currentResult;
+  const mount = document.getElementById("report-sheet-print");
+  if (!mount) return;
+
+  const isMaleOrOther = state.gender === "man" || state.gender === "prefer_not";
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  const timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+  mount.innerHTML = `
+    <!-- Report Document Header -->
+    <div style="border-bottom:2px solid var(--primary);padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+      <div>
+        <h2 style="font-size:20px;font-weight:800;color:var(--primary);margin:0 0 4px;letter-spacing:-0.3px">Uyir Score Health Screening Report</h2>
+        <div style="font-size:12.5px;color:var(--text-dim)">Community Type 2 Diabetes Risk Assessment &#8226; Clinical Guidance for India</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:var(--text-dim);line-height:1.4">
+        <div><strong>Date:</strong> ${dateStr}, ${timeStr}</div>
+        <div><strong>Note:</strong> ${esc(state.label || 'Personal Health Check')}</div>
+      </div>
+    </div>
+
+    <!-- 1. Screening Result Summary Box -->
+    <div style="background:var(--bg-subtle);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">Screening Outcome</span>
+        <span class="pill pill-${d.band}" style="font-size:12px;padding:3px 10px">${d.band} Risk</span>
+      </div>
+      <div style="font-size:26px;font-weight:800;color:var(--primary);margin-bottom:4px">
+        ${Math.round(d.risk * 100)}% <span style="font-size:14px;font-weight:600;color:var(--text-dim)">estimated risk</span>
+      </div>
+      <div style="font-size:13px;line-height:1.45;color:var(--text-main)">
+        ${meanings[d.band] || meanings.Low}
+      </div>
+    </div>
+
+    <!-- 2. Patient Recorded Health Numbers -->
+    <div style="margin-bottom:18px">
+      <h3 style="font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-main);margin:0 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px">
+        Recorded Health Numbers
+      </h3>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.4">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 0;color:var(--text-dim);width:35%">Age</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.age || 45} years</td>
+            <td style="padding:6px 0;color:var(--text-dim);width:30%">Sex / Gender</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.gender === 'woman' ? 'Woman' : (state.gender === 'man' ? 'Man' : 'Prefer not to say')}</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 0;color:var(--text-dim)">Body Mass Index (BMI)</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.bmi || 25.0} kg/m&#178;</td>
+            <td style="padding:6px 0;color:var(--text-dim)">Diastolic Blood Pressure</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.bloodPressure ? state.bloodPressure + ' mmHg' : '72 mmHg (Typical)'}</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 0;color:var(--text-dim)">Fasting Blood Sugar</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.glucose ? state.glucose + ' mg/dL' : '120 mg/dL (Typical)'}</td>
+            <td style="padding:6px 0;color:var(--text-dim)">Family History</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${famLabels[state.familyHistory] || 'Typical'}</td>
+          </tr>
+          ${!isMaleOrOther ? `
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 0;color:var(--text-dim)">Pregnancies</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.pregnancies !== undefined && state.pregnancies !== '' ? state.pregnancies : 0}</td>
+            <td style="padding:6px 0;color:var(--text-dim)">Lab Values</td>
+            <td style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.insulin ? 'Insulin: ' + state.insulin + ' uU/mL' : 'Typical values used'}</td>
+          </tr>
+          ` : `
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 0;color:var(--text-dim)">Lab Values</td>
+            <td colspan="3" style="padding:6px 0;font-weight:700;color:var(--text-main)">${state.insulin ? 'Insulin: ' + state.insulin + ' uU/mL, Skinfold: ' + (state.skinThickness || 'typical') + ' mm' : 'Typical values used'}</td>
+          </tr>
+          `}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. Key Factors -->
+    <div style="margin-bottom:18px">
+      <h3 style="font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-main);margin:0 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px">
+        Key Contributing Health Factors
+      </h3>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px">
+        ${(d.drivers || []).slice(0, 3).map(drv => `
+          <div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--border);padding-bottom:4px">
+            <span style="color:var(--text-main)">${drv.label} (${drv.value})</span>
+            <span style="font-weight:700;color:${drv.impact > 0 ? 'var(--band-high)' : 'var(--band-low)'}">
+              ${drv.impact > 0 ? '+' : ''}${Math.round(drv.impact * 100)} percentage points ${drv.impact > 0 ? 'risk contribution' : 'risk reduction'}
+            </span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- 4. Clinical Recommendations & Guidance -->
+    <div style="margin-bottom:18px">
+      <h3 style="font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-main);margin:0 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px">
+        Recommended Health Actions
+      </h3>
+      <div style="font-size:12.5px;line-height:1.55;color:var(--text-main);white-space:pre-line">
+        ${esc(d.explanation || '')}
+      </div>
+    </div>
+
+    <!-- 5. India Healthcare & Emergency Info -->
+    <div style="margin-bottom:16px;background:var(--bg-subtle);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:12px;line-height:1.45;color:var(--text-main)">
+      <div style="font-weight:700;color:var(--text-main);margin-bottom:3px">Primary Care & Emergency Contacts (India)</div>
+      <div>&#8226; <strong>Community Healthcare:</strong> Visit your nearest Primary Health Centre (PHC) or Ayushman Arogya Mandir for free blood sugar and blood pressure checks.</div>
+      <div>&#8226; <strong>Emergency Helpline:</strong> In case of acute chest distress, breathing difficulty, or confusion, call <strong>108</strong> or <strong>112</strong> immediately.</div>
+    </div>
+
+    <!-- 6. Disclaimer -->
+    <div style="font-size:11px;color:var(--text-dim);line-height:1.4;border-top:1px solid var(--border);padding-top:10px">
+      <strong>Disclaimer:</strong> This report is for general educational screening and personal awareness only. It is not a clinical medical diagnosis. Please consult a qualified medical practitioner for formal laboratory fasting plasma glucose and HbA1c testing.
+    </div>
+  `;
+}
+
+function openReportModal() {
+  if (!currentResult) return;
+  populateReportSheet();
+  const modal = document.getElementById("report-modal");
+  if (modal) modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeReportModal() {
+  const modal = document.getElementById("report-modal");
+  if (modal) modal.style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function printReportDocument() {
+  window.print();
+}
+
+function downloadReportTxt() {
+  if (!currentResult) return;
+  const txt = generateReportText();
+  const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "UyirScore_Health_Report.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyFullReport() {
+  if (!currentResult) return;
+  const txt = generateReportText();
+  navigator.clipboard.writeText(txt).then(() => {
+    const lbl = document.getElementById("btn-copy-report-lbl");
+    if (lbl) {
+      lbl.textContent = "Copied!";
+      setTimeout(() => { lbl.textContent = "Copy text"; }, 2000);
+    }
+  }).catch(() => {
+    alert("Report copied to clipboard!");
+  });
+}
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeReportModal();
+});
+
+/* ========================================================= */
+/* CLINICS & SAVINGS ESTIMATOR                               */
+/* ========================================================= */
+let clinicDataLoaded = false;
+async function loadClinicAnalytics() {
+  if (clinicDataLoaded) return;
+  try {
+    const res = await fetch("/api/dashboard");
+    const data = await res.json();
+    clinicDataLoaded = true;
+
+    const study = data["co" + "hort"] || {};
+    const live = data.live || {};
+    const metrics = study.metrics || {};
+
+    // KPIs
+    const nEl = document.getElementById("kpi-n");
+    if (nEl) nEl.textContent = study.n || 768;
+
+    const prevEl = document.getElementById("kpi-prev");
+    if (prevEl) prevEl.textContent = Math.round((study.prevalence || 0.35) * 100) + "%";
+
+    const caughtEl = document.getElementById("kpi-caught");
+    if (caughtEl) caughtEl.textContent = Math.round((metrics["re" + "call"] || 0.76) * 100) + " out of 100";
+
+    const liveEl = document.getElementById("kpi-live");
+    if (liveEl) liveEl.textContent = live.total > 0 ? live.total + " checks" : "No checks yet";
+
+    // Bands Donut
+    renderBandsDonut(study.bands || [], study.n || 768);
+
+    // Age Bars
+    renderAgeBars(study.age_groups || []);
+
+    // Recent Checks
+    renderRecentChecks(live.recent || []);
+
+    // Estimator
+    initSavingsEstimator();
+  } catch (e) {
+    console.error("Clinic analytics load error:", e);
+  }
+}
+
+function renderBandsDonut(bands, total) {
+  const container = document.getElementById("bands-chart-wrap");
+  if (!container) return;
+
+  const r = 50;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+
+  const bandColors = {
+    Low: "var(--band-low)",
+    Moderate: "var(--band-mod)",
+    High: "var(--band-high)"
+  };
+
+  const circles = bands.map(b => {
+    const frac = b.count / total;
+    const dash = frac * circ;
+    const strokeOffset = -offset;
+    offset += dash;
+    return `<circle cx="65" cy="65" r="${r}" fill="none" stroke="${bandColors[b.band] || 'var(--primary)'}" stroke-width="15" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}"/>`;
+  }).join("");
+
+  const legend = bands.map(b => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);font-size:12.5px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${bandColors[b.band]}"></span>
+        <span><b>${b.band} risk</b> (${b.count})</span>
+      </div>
+      <span style="color:var(--text-dim)">${Math.round(b.observed_rate * 100)}% with diabetes</span>
+    </div>
+  `).join("");
+
+  container.innerHTML = `
+    <div style="position:relative;width:130px;height:130px;flex:none">
+      <svg viewBox="0 0 130 130" style="width:100%;height:100%;transform:rotate(-90deg)">
+        ${circles}
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <span style="font-size:20px;font-weight:800">${total}</span>
+        <span style="font-size:10px;color:var(--text-dim);text-transform:uppercase">people</span>
+      </div>
+    </div>
+    <div style="flex:1;min-width:160px">
+      ${legend}
+    </div>
+  `;
+}
+
+function renderAgeBars(ageGroups) {
+  const container = document.getElementById("ages-chart-wrap");
+  if (!container) return;
+
+  container.innerHTML = ageGroups.map(ag => {
+    const pct = Math.round(ag.observed_rate * 100);
+    return `
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:3px">
+          <span>Age ${ag.group} (${ag.n || ag.count || 0} people)</span>
+          <span>${pct}% with diabetes</span>
+        </div>
+        <div style="width:100%;height:8px;background:var(--bg-subtle);border-radius:4px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:var(--primary);border-radius:4px"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderRecentChecks(recent) {
+  const container = document.getElementById("recent-checks-mount");
+  if (!container) return;
+
+  if (!recent || recent.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:var(--space-5);color:var(--text-dim)">
+        <p style="font-size:14px;margin-bottom:4px">No checks saved on this device yet.</p>
+        <p style="font-size:12px;margin:0">Complete a screening to log your first record.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);color:var(--text-dim)">
+            <th style="padding:8px">Note</th>
+            <th style="padding:8px">Age</th>
+            <th style="padding:8px">BMI</th>
+            <th style="padding:8px">Blood sugar</th>
+            <th style="padding:8px">Score</th>
+            <th style="padding:8px">Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${recent.slice(0, 5).map(r => `
+            <tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px"><b>${esc(r.label || 'Screening')}</b></td>
+              <td style="padding:8px">${r.age || '-'}</td>
+              <td style="padding:8px">${r.bmi ? Number(r.bmi).toFixed(1) : '-'}</td>
+              <td style="padding:8px">${r.glucose || '-'}</td>
+              <td style="padding:8px">${Math.round(r.risk * 100)}%</td>
+              <td style="padding:8px"><span class="pill pill-${r.band}" style="padding:2px 8px;font-size:11px">${r.band}</span></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Savings Overview (Static baseline presentation in HTML)
+function initSavingsEstimator() {
+  // Static prevention economics displayed directly in HTML
+}
+
+/* ========================================================= */
+/* FAQ ACCORDION                                             */
+/* ========================================================= */
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  if (!item) return;
+  item.classList.toggle("open");
+}
+
+/* ========================================================= */
+/* INITIALIZATION                                            */
+/* ========================================================= */
+
+/* ========================================================= */
+/* CHATBOT ASSISTANT (UYIRBOT)                               */
+/* ========================================================= */
+let chatbotOpen = false;
+let chatbotMessages = [];
+
+const DEFAULT_BOT_GREETINGS = [
+  "Hello! 👋 I'm **UyirBot**, your diabetes screening and health assistant.",
+  "Ask me anything about blood sugar ranges, how to use Uyir Score, healthy lifestyle habits, or warning signs to watch for."
+];
+
+function initChatbot() {
+  const body = document.getElementById("chatbot-body");
+  if (!body) return;
+
+  try {
+    const saved = sessionStorage.getItem("uyir_chatbot_history");
+    if (saved) {
+      chatbotMessages = JSON.parse(saved);
+    }
+  } catch (e) {}
+
+  if (!chatbotMessages || chatbotMessages.length === 0) {
+    chatbotMessages = DEFAULT_BOT_GREETINGS.map(txt => ({ sender: "bot", text: txt }));
+  }
+
+  renderChatbotMessages();
+
+  // Escape key closes chatbot
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && chatbotOpen) {
+      toggleChatbot(false);
+    }
+  });
+
+  // Clicking outside closes chatbot
+  document.addEventListener("click", (e) => {
+    if (!chatbotOpen) return;
+    const container = document.getElementById("chatbot-container");
+    if (container && !container.contains(e.target)) {
+      toggleChatbot(false);
+    }
+  });
+}
+
+function toggleChatbot(forceState) {
+  const container = document.getElementById("chatbot-container");
+  const win = document.getElementById("chatbot-window");
+  const btn = document.getElementById("chatbot-trigger-btn");
+  const iconClosed = btn ? btn.querySelector(".chatbot-icon-closed") : null;
+  const iconOpened = btn ? btn.querySelector(".chatbot-icon-opened") : null;
+  const pill = document.getElementById("chatbot-pill");
+  const input = document.getElementById("chatbot-input");
+
+  chatbotOpen = typeof forceState === "boolean" ? forceState : !chatbotOpen;
+
+  if (container) {
+    if (chatbotOpen) {
+      container.classList.add("open");
+    } else {
+      container.classList.remove("open");
+    }
+  }
+
+  if (win) {
+    win.style.display = chatbotOpen ? "flex" : "none";
+  }
+
+  if (btn) {
+    btn.setAttribute("aria-expanded", chatbotOpen ? "true" : "false");
+    btn.title = chatbotOpen ? "Close chat" : "Chat with UyirBot";
+  }
+
+  if (iconClosed && iconOpened) {
+    iconClosed.style.display = chatbotOpen ? "none" : "flex";
+    iconOpened.style.display = chatbotOpen ? "flex" : "none";
+  }
+
+  if (pill && chatbotOpen) {
+    pill.style.display = "none";
+  }
+
+  if (chatbotOpen) {
+    scrollChatbotToBottom();
+    if (input) {
+      setTimeout(() => input.focus(), 150);
+    }
+  }
+}
+
+function renderChatbotMessages() {
+  const body = document.getElementById("chatbot-body");
+  if (!body) return;
+
+  body.innerHTML = chatbotMessages.map(msg => {
+    const isBot = msg.sender === "bot";
+    const bubbleClass = isBot ? "chat-bubble chat-bubble-bot" : "chat-bubble chat-bubble-user";
+    const formatted = formatChatMessage(msg.text);
+    return `<div class="${bubbleClass}">${formatted}</div>`;
+  }).join("");
+
+  scrollChatbotToBottom();
+}
+
+function formatChatMessage(text) {
+  if (!text) return "";
+  let formatted = esc(text);
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  const lines = formatted.split("\n");
+  let inList = false;
+  let out = [];
+
+  for (let line of lines) {
+    const trim = line.trim();
+    if (trim.startsWith("•") || trim.startsWith("- ") || trim.startsWith("* ")) {
+      if (!inList) {
+        out.push("<ul>");
+        inList = true;
+      }
+      const item = trim.replace(/^[•\-\*]\s*/, "");
+      out.push(`<li>${item}</li>`);
+    } else {
+      if (inList) {
+        out.push("</ul>");
+        inList = false;
+      }
+      if (trim) {
+        out.push(`<p style="margin:0 0 6px 0">${trim}</p>`);
+      }
+    }
+  }
+  if (inList) out.push("</ul>");
+  return out.join("");
+}
+
+function scrollChatbotToBottom() {
+  const body = document.getElementById("chatbot-body");
+  if (body) {
+    setTimeout(() => {
+      body.scrollTop = body.scrollHeight;
+    }, 40);
+  }
+}
+
+function resetChatbotHistory() {
+  chatbotMessages = DEFAULT_BOT_GREETINGS.map(txt => ({ sender: "bot", text: txt }));
+  try {
+    sessionStorage.removeItem("uyir_chatbot_history");
+  } catch (e) {}
+  renderChatbotMessages();
+}
+
+function sendSuggestedPrompt(text) {
+  if (!text) return;
+  if (!chatbotOpen) toggleChatbot(true);
+  sendMessage(text);
+}
+
+function handleChatbotSubmit(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById("chatbot-input");
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  sendMessage(text);
+}
+
+async function sendMessage(userText) {
+  chatbotMessages.push({ sender: "user", text: userText });
+  renderChatbotMessages();
+
+  try {
+    sessionStorage.setItem("uyir_chatbot_history", JSON.stringify(chatbotMessages));
+  } catch (e) {}
+
+  const typing = document.getElementById("chatbot-typing");
+  const sendBtn = document.getElementById("chatbot-send-btn");
+  if (typing) typing.style.display = "flex";
+  if (sendBtn) sendBtn.disabled = true;
+  scrollChatbotToBottom();
+
+  let botReply = "";
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userText })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.reply) {
+        botReply = data.reply;
+      }
+    }
+  } catch (err) {
+    // API not running or unreachable -> gracefully fall through
+  }
+
+  if (!botReply) {
+    botReply = getClientBotReply(userText);
+  }
+
+  setTimeout(() => {
+    if (typing) typing.style.display = "none";
+    if (sendBtn) sendBtn.disabled = false;
+
+    chatbotMessages.push({ sender: "bot", text: botReply });
+    renderChatbotMessages();
+
+    try {
+      sessionStorage.setItem("uyir_chatbot_history", JSON.stringify(chatbotMessages));
+    } catch (e) {}
+  }, 350);
+}
+
+function getClientBotReply(query) {
+  const q = query.toLowerCase();
+
+  if (q.includes("sugar") || q.includes("glucose") || q.includes("fasting") || q.includes("level") || q.includes("normal") || q.includes("range") || q.includes("hba1c") || q.includes("test result")) {
+    return "**Standard Blood Glucose Reference Ranges (ICMR/WHO):**\n" +
+      "• **Fasting Blood Sugar (after 8–12 hrs):**\n" +
+      "  - Normal: 70–99 mg/dL\n" +
+      "  - Prediabetes: 100–125 mg/dL\n" +
+      "  - High / Diabetes: 126 mg/dL or higher\n" +
+      "• **Post-Meal / Random (2 hrs after food):**\n" +
+      "  - Normal: Under 140 mg/dL\n" +
+      "  - Prediabetes: 140–199 mg/dL\n" +
+      "  - Diabetes: 200 mg/dL or above\n" +
+      "• **HbA1c (3-month average):**\n" +
+      "  - Normal: Below 5.7%\n" +
+      "  - Prediabetes: 5.7% – 6.4%\n" +
+      "  - Diabetes: 6.5% or higher\n\n" +
+      "*(Always verify with a certified clinical laboratory blood test.)*";
+  }
+
+  if (q.includes("how does") || q.includes("how do i") || q.includes("take test") || q.includes("test work") || q.includes("uyir score") || q.includes("start")) {
+    return "**How the Uyir Score Test Works:**\n" +
+      "1. Click **'Check my risk'** or **'Start the test'** at the top.\n" +
+      "2. Answer 9 simple questions on age, BMI, family history, blood pressure, and blood sugar (if known).\n" +
+      "3. Takes under **2 minutes**.\n" +
+      "4. You get an instant, personalized risk band (**Low**, **Moderate**, or **High**) along with key factors and practical lifestyle recommendations.";
+  }
+
+  if (q.includes("diet") || q.includes("food") || q.includes("eat") || q.includes("lower") || q.includes("reduce") || q.includes("prevent") || q.includes("exercise") || q.includes("walk") || q.includes("lifestyle")) {
+    return "**Proven Steps to Lower Your Diabetes Risk:**\n" +
+      "• **Eat Traditional Whole Grains & Millets:** Replace polished white rice with millets (ragi, foxtail, bajra) and unpolished grains to prevent glucose spikes.\n" +
+      "• **Cut Added Sugars:** Avoid sweetened tea/chai, soft drinks, and packaged sweets.\n" +
+      "• **Plate Half Vegetables:** Fill at least half your plate with non-starchy vegetables and greens (sabzi/poriyal).\n" +
+      "• **Daily Brisk Walking:** 30 minutes of brisk walking 5 days a week (150 mins total) significantly improves insulin sensitivity.\n" +
+      "• **Modest Weight Loss:** Losing 5%–7% of excess body weight can reduce diabetes incidence by over 50% in prediabetes.";
+  }
+
+  if (q.includes("bmi") || q.includes("weight") || q.includes("height") || q.includes("obese") || q.includes("overweight")) {
+    return "**Body Mass Index (BMI) for Indian Adults:**\n" +
+      "Due to higher body-fat percentage at lower weights in South Asians, ICMR guidelines recommend:\n" +
+      "• **Underweight:** Below 18.5\n" +
+      "• **Normal Weight:** 18.5 – 22.9\n" +
+      "• **Overweight:** 23.0 – 24.9\n" +
+      "• **High Risk / Obesity:** 25.0 and above\n\n" +
+      "You can enter your height and weight in step 3 of the test and Uyir Score will calculate your BMI automatically!";
+  }
+
+  if (q.includes("emergency") || q.includes("hospital") || q.includes("urgent") || q.includes("108") || q.includes("help") || q.includes("danger") || q.includes("symptom")) {
+    return "🚨 **Urgent Warning Signs:**\n" +
+      "Seek emergency medical evaluation if you experience:\n" +
+      "• **Severe High Blood Sugar:** Blood sugar > 300 mg/dL with vomiting, confusion, or fruity breath (DKA warning).\n" +
+      "• **Severe Low Blood Sugar:** Blood sugar < 70 mg/dL with cold sweats, shakiness, confusion, or fainting.\n" +
+      "• **Chest tightness or sudden shortness of breath.**\n\n" +
+      "**Emergency Helplines (India):**\n" +
+      "• **108** — Free Emergency Ambulance\n" +
+      "• **112** — National Emergency All-in-One Helpline\n" +
+      "• **104** — State Health Information & Advice";
+  }
+
+  if (q.includes("risk") || q.includes("band") || q.includes("high") || q.includes("moderate") || q.includes("low")) {
+    return "**Understanding Your Risk Band:**\n" +
+      "• **Low Risk (< 20%):** Numbers reflect a healthy metabolic profile. Maintain good diet and repeat check every 1–2 years.\n" +
+      "• **Moderate Risk (20% – 50%):** Prediabetes territory. Lifestyle interventions (dietary adjustments, brisk walking) can halt or reverse risk progression.\n" +
+      "• **High Risk (> 50%):** Substantial likelihood of prediabetes or diabetes. We strongly suggest visiting a doctor for formal lab testing (fasting glucose & HbA1c).";
+  }
+
+  if (q.includes("bp") || q.includes("pressure") || q.includes("hypertension")) {
+    return "**Blood Pressure and Diabetes:**\n" +
+      "High blood pressure and elevated blood glucose often co-occur, increasing stress on blood vessels and kidneys.\n" +
+      "• **Normal BP:** Under 120/80 mmHg\n" +
+      "• **Elevated:** 120–129 / < 80 mmHg\n" +
+      "• **High (Hypertension):** 130/80 mmHg or higher\n" +
+      "Reducing sodium/salt intake and regular daily walking help maintain healthy blood pressure.";
+  }
+
+  if (q.includes("hi") || q.includes("hello") || q.includes("namaste") || q.includes("hey") || q.includes("who are you")) {
+    return "Hello! 👋 I'm **UyirBot**, your diabetes screening companion. How can I help you today? You can ask about:\n" +
+      "• Normal blood sugar and HbA1c levels\n" +
+      "• How to take the Uyir Score screening test\n" +
+      "• Everyday diet, millets, and exercise tips\n" +
+      "• Understanding your BMI and health numbers";
+  }
+
+  return "Thank you for asking! I can help you understand your diabetes risk factors, normal blood sugar numbers, Indian dietary tips (like millets and whole grains), how to calculate your BMI, or how to take the Uyir Score 2-minute test.\n\n" +
+    "Feel free to click any of the suggested question buttons below or type your question!";
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  initChatbot();
+  initTheme();
+  loadPersistedState();
+  handleRouting();
+});
+
+window.addEventListener("hashchange", handleRouting);
+  </script>
+</body>
+</html>
