@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaagai Pharm - Pharmacy &amp; Clinical Intelligence Platform</title>
+  <link rel="icon" type="image/png" href="/logo.png">
   <style>
 /* CSS Reset and Variables */
 :root {
@@ -2017,6 +2018,19 @@ main {
   margin-bottom: 4px;
 }
 
+@media (max-width: 600px) {
+  .stats-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .stat-card-badge {
+    padding: 12px 14px;
+  }
+  .stat-number {
+    font-size: 24px;
+  }
+}
+
 .inventory-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -2122,6 +2136,17 @@ main {
   background-color: var(--band-low-bg);
   color: var(--band-low-text);
   border: 1px solid rgba(21, 128, 61, 0.3);
+}
+.badge-expired {
+  background-color: #7f1d1d;
+  color: #ffffff;
+  border: 1px solid #991b1b;
+}
+.stat-card-badge.stat-alert-darkred {
+  border-left: 4px solid #b91c1c;
+}
+.stat-number.text-darkred {
+  color: #b91c1c;
 }
 
 /* Modal Form Styles */
@@ -2348,6 +2373,9 @@ main {
           </div>
         </div>
 
+        <!-- Inline Error Banner for Inventory -->
+        <div id="inventory-inline-error" style="display:none;color:var(--band-high);background:var(--band-high-bg);border:1px solid rgba(185,28,28,0.3);padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:14px"></div>
+
         <!-- Summary Banner Stat Cards -->
         <div class="stats-summary-grid">
           <div class="stat-card-badge stat-alert-red">
@@ -2369,6 +2397,17 @@ main {
             </div>
             <div style="width:42px;height:42px;border-radius:10px;background:var(--band-mod-bg);color:var(--band-mod);display:grid;place-items:center">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card-badge stat-alert-darkred">
+            <div>
+              <div class="stat-label">Expired Items</div>
+              <div id="stat-expired-count" class="stat-number text-darkred">0</div>
+              <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px">Expiry date past today</div>
+            </div>
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(127,29,29,0.15);color:#b91c1c;display:grid;place-items:center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
           </div>
 
@@ -2400,11 +2439,11 @@ main {
           <table class="data-table" id="inventory-table">
             <thead>
               <tr>
-                <th onclick="sortInventory('medicine_name')">Medicine Name <span id="sort-icon-medicine_name">&uarr;&darr;</span></th>
-                <th onclick="sortInventory('active_ingredient')">Active Ingredient <span id="sort-icon-active_ingredient">&uarr;&darr;</span></th>
-                <th onclick="sortInventory('current_stock')" style="text-align:right">Current Stock <span id="sort-icon-current_stock">&uarr;&darr;</span></th>
-                <th onclick="sortInventory('minimum_required_stock')" style="text-align:right">Min Required <span id="sort-icon-minimum_required_stock">&uarr;&darr;</span></th>
-                <th onclick="sortInventory('expiry_date')">Expiry Date <span id="sort-icon-expiry_date">&uarr;&darr;</span></th>
+                <th id="th-medicine_name" onclick="sortInventory('medicine_name')">Medicine Name <span id="sort-icon-medicine_name">&uarr;&darr;</span></th>
+                <th id="th-active_ingredient" onclick="sortInventory('active_ingredient')">Active Ingredient <span id="sort-icon-active_ingredient">&uarr;&darr;</span></th>
+                <th id="th-current_stock" onclick="sortInventory('current_stock')" style="text-align:right">Current Stock <span id="sort-icon-current_stock">&uarr;&darr;</span></th>
+                <th id="th-minimum_required_stock" onclick="sortInventory('minimum_required_stock')" style="text-align:right">Min Required <span id="sort-icon-minimum_required_stock">&uarr;&darr;</span></th>
+                <th id="th-expiry_date" onclick="sortInventory('expiry_date')">Expiry Date <span id="sort-icon-expiry_date">&uarr;&darr;</span></th>
                 <th class="no-sort">Status</th>
                 <th class="no-sort" style="text-align:right">Actions</th>
               </tr>
@@ -3018,6 +3057,11 @@ main {
       </div>
       <form id="inventory-form" onsubmit="handleSaveInventory(event)" style="padding:20px">
         <input type="hidden" id="inv-id" value="">
+        <div id="inv-modal-error" style="display:none;color:var(--band-high);background:var(--band-high-bg);border:1px solid rgba(185,28,28,0.3);padding:8px 12px;border-radius:6px;font-size:12.5px;font-weight:600;margin-bottom:12px"></div>
+        <div id="inv-admin-key-group" style="display:none;margin-bottom:14px;padding:10px 14px;background:var(--bg-subtle);border:1.5px solid var(--border);border-radius:8px">
+          <label for="inv-admin-key-input" style="display:block;font-size:12.5px;font-weight:700;color:var(--text-main);margin-bottom:5px">Admin Authorization Key (X-Admin-Key):</label>
+          <input type="password" id="inv-admin-key-input" placeholder="Enter admin key..." style="width:100%;padding:8px 12px;font-size:13px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg-input)" oninput="sessionStorage.setItem('vaagai_admin_key', this.value.trim())">
+        </div>
         <div class="form-group">
           <label for="inv-medicine-name">Medicine Name *</label>
           <input type="text" id="inv-medicine-name" placeholder="e.g. Metformin 500mg Tablets" required>
@@ -3056,9 +3100,15 @@ main {
           <h3 style="font-size:16px;font-weight:800;margin:0 0 2px">Knowledge Base Documents (RAG)</h3>
           <div style="font-size:12px;color:var(--text-dim)">Ingested drug monographs and clinical PDFs available for VaagaiBot</div>
         </div>
-        <button type="button" class="btn-icon" aria-label="Close modal" onclick="closeManageSourcesModal()" style="width:32px;height:32px">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)">
+            <label for="admin-key-input" style="font-weight:600">Admin Key:</label>
+            <input type="password" id="admin-key-input" placeholder="X-Admin-Key" style="width:120px;padding:3px 6px;font-size:12px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-main)" oninput="sessionStorage.setItem('vaagai_admin_key', this.value.trim())">
+          </div>
+          <button type="button" class="btn-icon" aria-label="Close modal" onclick="closeManageSourcesModal()" style="width:32px;height:32px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
       </div>
 
       <div style="padding:20px;overflow-y:auto;max-height:calc(85vh - 70px)">
@@ -3091,19 +3141,21 @@ main {
         <!-- Section 3: Currently Ingested Documents List -->
         <div>
           <h4 style="font-size:14px;font-weight:700;margin:0 0 10px">Currently Ingested Documents (<span id="drug-doc-count">0</span>)</h4>
+          <div id="sources-modal-error" style="display:none;color:var(--band-high);background:var(--band-high-bg);border:1px solid rgba(185,28,28,0.3);padding:8px 12px;border-radius:6px;font-size:12.5px;font-weight:600;margin-bottom:12px"></div>
           <div class="table-responsive">
             <table class="data-table" style="font-size:12.5px">
               <thead>
                 <tr>
                   <th>Title</th>
                   <th>Source</th>
+                  <th>Chunks</th>
                   <th>Ingested Date</th>
                   <th style="text-align:right">Action</th>
                 </tr>
               </thead>
               <tbody id="drug-docs-table-body">
                 <tr>
-                  <td colspan="4" style="text-align:center;padding:15px;color:var(--text-dim)">Loading ingested sources...</td>
+                  <td colspan="5" style="text-align:center;padding:15px;color:var(--text-dim)">Loading ingested sources...</td>
                 </tr>
               </tbody>
             </table>
@@ -3419,33 +3471,91 @@ function closeMobileMenu() {
 /* ========================================================= */
 /* INVENTORY & PHARMACY MANAGEMENT JAVASCRIPT               */
 /* ========================================================= */
+// Admin Authorization helper functions
+function getAdminHeaders(extraHeaders = {}) {
+  const headers = { ...extraHeaders };
+  let key = sessionStorage.getItem('vaagai_admin_key');
+  if (!key) {
+    const invInput = document.getElementById('inv-admin-key-input');
+    if (invInput && invInput.value && invInput.value.trim()) {
+      key = invInput.value.trim();
+      sessionStorage.setItem('vaagai_admin_key', key);
+    }
+  }
+  if (!key) {
+    const srcInput = document.getElementById('admin-key-input');
+    if (srcInput && srcInput.value && srcInput.value.trim()) {
+      key = srcInput.value.trim();
+      sessionStorage.setItem('vaagai_admin_key', key);
+    }
+  }
+  if (key) {
+    headers['X-Admin-Key'] = key;
+  }
+  return headers;
+}
+
+function checkAdminUnauthorized(res) {
+  if (res && res.status === 401) {
+    const key = prompt('Admin Authorization Required (X-Admin-Key).\nPlease enter the Admin Key:');
+    if (key !== null && key.trim() !== '') {
+      sessionStorage.setItem('vaagai_admin_key', key.trim());
+      const adminInput = document.getElementById('admin-key-input');
+      if (adminInput) adminInput.value = key.trim();
+      return true;
+    }
+  }
+  return false;
+}
+
 let inventoryData = [];
 let inventorySortCol = 'medicine_name';
 let inventorySortAsc = true;
 let inventoryFilterQuery = '';
 
 async function loadInventory() {
+  const errBanner = document.getElementById('inventory-inline-error');
+  if (errBanner) errBanner.style.display = 'none';
+
   try {
     const res = await fetch('/api/inventory');
+    if (!res.ok) {
+      throw new Error('Failed to load inventory (HTTP ' + res.status + ')');
+    }
     const data = await res.json();
     inventoryData = data.items || [];
 
     // Update Stat Cards
-    const lowStockCount = inventoryData.filter(i => i.is_low_stock).length;
-    const nearExpiryCount = inventoryData.filter(i => i.is_near_expiry).length;
-    const totalCount = inventoryData.length;
+    const lowStockCount = (data.summary && data.summary.low_stock_count !== undefined)
+      ? data.summary.low_stock_count
+      : inventoryData.filter(i => i.is_low_stock).length;
+    const nearExpiryCount = (data.summary && data.summary.near_expiry_count !== undefined)
+      ? data.summary.near_expiry_count
+      : inventoryData.filter(i => i.is_near_expiry).length;
+    const expiredCount = (data.summary && data.summary.expired_count !== undefined)
+      ? data.summary.expired_count
+      : inventoryData.filter(i => i.is_expired).length;
+    const totalCount = (data.summary && data.summary.total_items !== undefined)
+      ? data.summary.total_items
+      : inventoryData.length;
 
     const elLow = document.getElementById('stat-low-stock-count');
     const elExp = document.getElementById('stat-near-expiry-count');
+    const elExpired = document.getElementById('stat-expired-count');
     const elTot = document.getElementById('stat-total-items-count');
 
     if (elLow) elLow.textContent = lowStockCount;
     if (elExp) elExp.textContent = nearExpiryCount;
+    if (elExpired) elExpired.textContent = expiredCount;
     if (elTot) elTot.textContent = totalCount;
 
     renderInventoryTable();
   } catch (err) {
     console.error('Failed to load inventory:', err);
+    if (errBanner) {
+      errBanner.textContent = 'Error connecting to inventory service: ' + (err.message || err);
+      errBanner.style.display = 'block';
+    }
     const tbody = document.getElementById('inventory-table-body');
     if (tbody) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--band-high)">Failed to connect to inventory server.</td></tr>';
@@ -3485,6 +3595,13 @@ function renderInventoryTable() {
   filtered.sort((a, b) => {
     let vA = a[inventorySortCol];
     let vB = b[inventorySortCol];
+
+    if (inventorySortCol === 'current_stock' || inventorySortCol === 'minimum_required_stock') {
+      const numA = Number(vA) || 0;
+      const numB = Number(vB) || 0;
+      return inventorySortAsc ? (numA - numB) : (numB - numA);
+    }
+
     if (vA === null || vA === undefined) vA = '';
     if (vB === null || vB === undefined) vB = '';
     if (typeof vA === 'string') vA = vA.toLowerCase();
@@ -3510,19 +3627,16 @@ function renderInventoryTable() {
   }
 
   tbody.innerHTML = filtered.map(item => {
-    // Pure comparison badges:
-    // current_stock <= minimum_required_stock -> Low Stock
-    // expiry_date <= today + 30 days -> Near Expiry
-    // neither -> OK
-    // Can show both badges
     let badges = [];
     if (item.is_low_stock) {
       badges.push('<span class="badge badge-low-stock">Low Stock</span>');
     }
-    if (item.is_near_expiry) {
+    if (item.is_expired) {
+      badges.push('<span class="badge badge-expired">Expired</span>');
+    } else if (item.is_near_expiry) {
       badges.push('<span class="badge badge-near-expiry">Near Expiry</span>');
     }
-    if (!item.is_low_stock && !item.is_near_expiry) {
+    if (!item.is_low_stock && !item.is_near_expiry && !item.is_expired) {
       badges.push('<span class="badge badge-ok">OK</span>');
     }
 
@@ -3538,7 +3652,7 @@ function renderInventoryTable() {
         <td><div style="display:flex;gap:4px;flex-wrap:wrap">${badges.join(' ')}</div></td>
         <td style="text-align:right;white-space:nowrap">
           <button type="button" class="btn-subtle" onclick="openEditMedicineModal(${item.id})" style="padding:4px 8px;margin-right:4px">Edit</button>
-          <button type="button" class="btn-subtle" onclick="deleteMedicine(${item.id}, '${escapeHtml(item.medicine_name).replace(/'/g, "\'")}')" style="padding:4px 8px;color:var(--band-high);border-color:rgba(185,28,28,0.3)">Delete</button>
+          <button type="button" class="btn-subtle" onclick="deleteMedicine(${item.id}, '${escapeHtml(item.medicine_name).replace(/'/g, "\\'")}')" style="padding:4px 8px;color:var(--band-high);border-color:rgba(185,28,28,0.3)">Delete</button>
         </td>
       </tr>
     `;
@@ -3553,6 +3667,12 @@ function openAddMedicineModal() {
   document.getElementById('inv-current-stock').value = '';
   document.getElementById('inv-minimum-stock').value = '10';
   document.getElementById('inv-expiry-date').value = '';
+  const keyGroup = document.getElementById('inv-admin-key-group');
+  if (keyGroup) keyGroup.style.display = 'none';
+  const keyInput = document.getElementById('inv-admin-key-input');
+  if (keyInput) keyInput.value = sessionStorage.getItem('vaagai_admin_key') || '';
+  const errEl = document.getElementById('inv-modal-error');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
   document.getElementById('inventory-modal').style.display = 'flex';
 }
 
@@ -3567,6 +3687,12 @@ function openEditMedicineModal(id) {
   document.getElementById('inv-current-stock').value = item.current_stock;
   document.getElementById('inv-minimum-stock').value = item.minimum_required_stock;
   document.getElementById('inv-expiry-date').value = item.expiry_date || '';
+  const keyGroup = document.getElementById('inv-admin-key-group');
+  if (keyGroup) keyGroup.style.display = 'none';
+  const keyInput = document.getElementById('inv-admin-key-input');
+  if (keyInput) keyInput.value = sessionStorage.getItem('vaagai_admin_key') || '';
+  const errEl = document.getElementById('inv-modal-error');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
   document.getElementById('inventory-modal').style.display = 'flex';
 }
 
@@ -3580,15 +3706,25 @@ async function handleSaveInventory(e) {
   const medicine_name = document.getElementById('inv-medicine-name').value.trim();
   const active_ingredient = document.getElementById('inv-active-ingredient').value.trim();
   const current_stock = parseInt(document.getElementById('inv-current-stock').value, 10);
-  const minimum_required_stock = parseInt(document.getElementById('inv-minimum-stock').value, 10) || 10;
+  const minimum_required_stock = parseInt(document.getElementById('inv-minimum-stock').value, 10);
   const expiry_date = document.getElementById('inv-expiry-date').value || null;
 
+  const errEl = document.getElementById('inv-modal-error');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+
   if (!medicine_name) {
-    alert('Medicine name is required.');
+    if (errEl) { errEl.textContent = 'Medicine name is required.'; errEl.style.display = 'block'; }
+    else alert('Medicine name is required.');
     return;
   }
-  if (isNaN(current_stock)) {
-    alert('Valid current stock is required.');
+  if (isNaN(current_stock) || current_stock < 0) {
+    if (errEl) { errEl.textContent = 'Current stock must be a non-negative integer.'; errEl.style.display = 'block'; }
+    else alert('Current stock must be a non-negative integer.');
+    return;
+  }
+  if (isNaN(minimum_required_stock) || minimum_required_stock < 0) {
+    if (errEl) { errEl.textContent = 'Minimum required stock must be a non-negative integer.'; errEl.style.display = 'block'; }
+    else alert('Minimum required stock must be a non-negative integer.');
     return;
   }
 
@@ -3612,21 +3748,39 @@ async function handleSaveInventory(e) {
       method = 'PUT';
     }
 
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       method: method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload)
     });
-    const result = await res.json();
+
+    const result = await res.json().catch(() => ({}));
 
     if (res.ok) {
       closeInventoryModal();
       await loadInventory();
     } else {
-      alert(result.error || 'Failed to save inventory item.');
+      if (res.status === 401) {
+        const keyGroup = document.getElementById('inv-admin-key-group');
+        if (keyGroup) keyGroup.style.display = 'block';
+        const keyInput = document.getElementById('inv-admin-key-input');
+        if (keyInput) keyInput.focus();
+      }
+      const errMsg = result.error || ('Failed to save inventory item (HTTP ' + res.status + ').');
+      if (errEl) {
+        errEl.textContent = errMsg;
+        errEl.style.display = 'block';
+      } else {
+        alert(errMsg);
+      }
     }
   } catch (err) {
-    alert('Connection error while saving item.');
+    if (errEl) {
+      errEl.textContent = 'Connection error while saving item: ' + (err.message || err);
+      errEl.style.display = 'block';
+    } else {
+      alert('Connection error while saving item.');
+    }
   } finally {
     btn.disabled = false;
     btn.textContent = 'Save Medicine';
@@ -3635,16 +3789,41 @@ async function handleSaveInventory(e) {
 
 async function deleteMedicine(id, name) {
   if (!confirm(`Are you sure you want to remove "${name}" from inventory?`)) return;
+  const errBanner = document.getElementById('inventory-inline-error');
+  if (errBanner) errBanner.style.display = 'none';
+
   try {
-    const res = await fetch('/api/inventory/' + id, { method: 'DELETE' });
-    const result = await res.json();
+    let res = await fetch('/api/inventory/' + id, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+
+    if (res.status === 401 && checkAdminUnauthorized(res)) {
+      res = await fetch('/api/inventory/' + id, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+    }
+
+    const result = await res.json().catch(() => ({}));
     if (res.ok) {
       await loadInventory();
     } else {
-      alert(result.error || 'Failed to delete item.');
+      const msg = result.error || ('Failed to delete item (HTTP ' + res.status + ').');
+      if (errBanner) {
+        errBanner.textContent = msg;
+        errBanner.style.display = 'block';
+      } else {
+        alert(msg);
+      }
     }
   } catch (err) {
-    alert('Connection error while deleting item.');
+    if (errBanner) {
+      errBanner.textContent = 'Connection error while deleting item: ' + (err.message || err);
+      errBanner.style.display = 'block';
+    } else {
+      alert('Connection error while deleting item.');
+    }
   }
 }
 
@@ -3688,9 +3867,13 @@ async function handleDrugChatSubmit(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question })
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
-    appendDrugMessage('bot', data.answer || 'No response returned.', data.sources || []);
+    if (res.ok) {
+      appendDrugMessage('bot', data.answer || 'No response returned.', data.sources || []);
+    } else {
+      appendDrugMessage('bot', data.error || ('Server error (HTTP ' + res.status + ')'), []);
+    }
   } catch (err) {
     appendDrugMessage('bot', 'Network error connecting to drug information service. Please ensure the server is running.', []);
   } finally {
@@ -3739,6 +3922,10 @@ function appendDrugMessage(role, text, sources = []) {
 /* Manage Sources Modal */
 async function openManageSourcesModal() {
   document.getElementById('manage-sources-modal').style.display = 'flex';
+  const adminInput = document.getElementById('admin-key-input');
+  if (adminInput) adminInput.value = sessionStorage.getItem('vaagai_admin_key') || '';
+  const errEl = document.getElementById('sources-modal-error');
+  if (errEl) errEl.style.display = 'none';
   await loadDrugDocuments();
 }
 
@@ -3749,7 +3936,7 @@ function closeManageSourcesModal() {
 async function loadDrugDocuments() {
   try {
     const res = await fetch('/api/drug-documents');
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     const docs = data.documents || [];
 
     const countEl = document.getElementById('drug-doc-count');
@@ -3759,7 +3946,7 @@ async function loadDrugDocuments() {
     if (!tbody) return;
 
     if (docs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-dim)">No documents ingested yet. Fetch an openFDA label or upload a PDF above.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-dim)">No documents ingested yet. Fetch an openFDA label or upload a PDF above.</td></tr>';
       return;
     }
 
@@ -3770,13 +3957,14 @@ async function loadDrugDocuments() {
 
       const dateStr = d.created_at ? d.created_at.split('T')[0] : '—';
       const linkHtml = d.source_url
-        ? `<a href="${escapeHtml(d.source_url)}" target="_blank" style="color:var(--primary);text-decoration:none">${escapeHtml(d.title)}</a>`
+        ? `<a href="${escapeHtml(d.source_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:none">${escapeHtml(d.title)}</a>`
         : escapeHtml(d.title);
 
       return `
         <tr>
           <td style="font-weight:600">${linkHtml}</td>
           <td>${srcBadge}</td>
+          <td style="color:var(--text-dim);font-weight:600">${d.chunks_count || 0}</td>
           <td style="color:var(--text-dim)">${dateStr}</td>
           <td style="text-align:right">
             <button type="button" class="btn-subtle" onclick="deleteDrugDocument(${d.id})" style="color:var(--band-high);padding:3px 8px">Delete</button>
@@ -3786,42 +3974,64 @@ async function loadDrugDocuments() {
     }).join('');
   } catch (err) {
     console.error('Failed to load drug documents:', err);
+    const tbody = document.getElementById('drug-docs-table-body');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--band-high)">Failed to connect to drug documents service.</td></tr>';
+    }
   }
 }
 
 async function fetchOpenFdaDrug() {
   const input = document.getElementById('openfda-input');
   const drugName = input ? input.value.trim() : '';
+  const statusEl = document.getElementById('openfda-status');
   if (!drugName) {
-    alert('Please enter a drug generic or brand name.');
+    statusEl.textContent = 'Please enter a drug generic or brand name.';
+    statusEl.style.color = 'var(--band-high)';
     return;
   }
 
   const btn = document.getElementById('btn-fetch-openfda');
-  const statusEl = document.getElementById('openfda-status');
   btn.disabled = true;
   statusEl.textContent = 'Querying openFDA API and embedding label sections...';
   statusEl.style.color = 'var(--primary)';
 
   try {
-    const res = await fetch('/api/drug-documents/fetch-openfda', {
+    let res = await fetch('/api/drug-documents/fetch-openfda', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ drug_name: drugName })
     });
-    const data = await res.json();
+
+    if (res.status === 401 && checkAdminUnauthorized(res)) {
+      res = await fetch('/api/drug-documents/fetch-openfda', {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ drug_name: drugName })
+      });
+    }
+
+    const data = await res.json().catch(() => ({}));
 
     if (res.ok) {
-      statusEl.textContent = `Ingested "${data.title}" successfully (${data.chunks_count} knowledge chunks)!`;
+      const refreshNote = data.refreshed ? ' (Refreshed existing)' : '';
+      statusEl.textContent = `Ingested "${data.title}" successfully (${data.chunks_count} knowledge chunks)${refreshNote}!`;
       statusEl.style.color = 'var(--band-low)';
       input.value = '';
       await loadDrugDocuments();
     } else {
-      statusEl.textContent = data.error || 'Failed to fetch drug from openFDA.';
+      let errMsg = data.error;
+      if (!errMsg) {
+        if (res.status === 401) errMsg = 'Unauthorized: Valid admin key required.';
+        else if (res.status === 404) errMsg = `Could not retrieve drug label from openFDA for '${drugName}'.`;
+        else if (res.status === 400) errMsg = 'Invalid drug name or openFDA record.';
+        else errMsg = 'Failed to fetch drug from openFDA.';
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = 'var(--band-high)';
     }
   } catch (err) {
-    statusEl.textContent = 'Connection error contacting openFDA endpoint.';
+    statusEl.textContent = 'Connection error contacting openFDA endpoint: ' + (err.message || err);
     statusEl.style.color = 'var(--band-high)';
   } finally {
     btn.disabled = false;
@@ -3830,27 +4040,44 @@ async function fetchOpenFdaDrug() {
 
 async function uploadDrugPdfFile() {
   const fileInput = document.getElementById('pdf-file-input');
+  const statusEl = document.getElementById('pdf-status');
   if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    alert('Please choose a PDF file to upload.');
+    statusEl.textContent = 'Please choose a PDF file to upload.';
+    statusEl.style.color = 'var(--band-high)';
     return;
   }
 
   const file = fileInput.files[0];
+  if (!file.name.toLowerCase().endsWith('.pdf')) {
+    statusEl.textContent = 'Only .pdf files are accepted.';
+    statusEl.style.color = 'var(--band-high)';
+    return;
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 
   const btn = document.getElementById('btn-upload-pdf');
-  const statusEl = document.getElementById('pdf-status');
   btn.disabled = true;
   statusEl.textContent = 'Extracting PDF text, chunking and embedding...';
   statusEl.style.color = 'var(--primary)';
 
   try {
-    const res = await fetch('/api/drug-documents/upload', {
+    let res = await fetch('/api/drug-documents/upload', {
       method: 'POST',
+      headers: getAdminHeaders(),
       body: formData
     });
-    const data = await res.json();
+
+    if (res.status === 401 && checkAdminUnauthorized(res)) {
+      res = await fetch('/api/drug-documents/upload', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: formData
+      });
+    }
+
+    const data = await res.json().catch(() => ({}));
 
     if (res.ok) {
       statusEl.textContent = `Uploaded "${data.title}" successfully (${data.chunks_count} chunks)!`;
@@ -3858,11 +4085,18 @@ async function uploadDrugPdfFile() {
       fileInput.value = '';
       await loadDrugDocuments();
     } else {
-      statusEl.textContent = data.error || 'Failed to parse and upload PDF.';
+      let errMsg = data.error;
+      if (!errMsg) {
+        if (res.status === 413) errMsg = 'File size exceeds the 10 MB limit.';
+        else if (res.status === 401) errMsg = 'Unauthorized: Valid admin key required.';
+        else if (res.status === 400) errMsg = 'Invalid file: Must be a valid PDF starting with %PDF header.';
+        else errMsg = 'Failed to parse and upload PDF.';
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = 'var(--band-high)';
     }
   } catch (err) {
-    statusEl.textContent = 'Connection error uploading PDF.';
+    statusEl.textContent = 'Connection error uploading PDF: ' + (err.message || err);
     statusEl.style.color = 'var(--band-high)';
   } finally {
     btn.disabled = false;
@@ -3871,15 +4105,41 @@ async function uploadDrugPdfFile() {
 
 async function deleteDrugDocument(id) {
   if (!confirm('Are you sure you want to remove this document and its chunk embeddings from the knowledge base?')) return;
+  const errEl = document.getElementById('sources-modal-error');
+  if (errEl) errEl.style.display = 'none';
+
   try {
-    const res = await fetch('/api/drug-documents/' + id, { method: 'DELETE' });
+    let res = await fetch('/api/drug-documents/' + id, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+
+    if (res.status === 401 && checkAdminUnauthorized(res)) {
+      res = await fetch('/api/drug-documents/' + id, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+    }
+
+    const data = await res.json().catch(() => ({}));
     if (res.ok) {
       await loadDrugDocuments();
     } else {
-      alert('Failed to delete document.');
+      const msg = data.error || ('Failed to delete document (HTTP ' + res.status + ').');
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.style.display = 'block';
+      } else {
+        alert(msg);
+      }
     }
   } catch (err) {
-    alert('Error connecting to server.');
+    if (errEl) {
+      errEl.textContent = 'Error connecting to server: ' + (err.message || err);
+      errEl.style.display = 'block';
+    } else {
+      alert('Error connecting to server.');
+    }
   }
 }
 
@@ -3888,8 +4148,9 @@ function handleRouting() {
     clearTimeout(autoAdvanceTimer);
     closeMobileMenu();
 
-    const hash = window.location.hash || "#home";
-    const cleanHash = hash.split("?")[0];
+    const hash = window.location.hash || "#dashboard";
+    let cleanHash = hash.split("?")[0];
+    if (cleanHash === "" || cleanHash === "#home") cleanHash = "#dashboard";
 
     // Highlight active nav item
     const navLinks = document.querySelectorAll(".nav-link, .mobile-nav-link");
@@ -5272,6 +5533,17 @@ async function loadClinicAnalytics() {
     initSavingsEstimator();
   } catch (e) {
     console.error("Clinic analytics load error:", e);
+    const wrap = document.getElementById("page-clinics");
+    if (wrap) {
+      let errBanner = document.getElementById("clinics-inline-error");
+      if (!errBanner) {
+        errBanner = document.createElement("div");
+        errBanner.id = "clinics-inline-error";
+        errBanner.style.cssText = "color:var(--band-high);background:var(--band-high-bg);border:1px solid rgba(185,28,28,0.3);padding:12px 16px;border-radius:8px;font-weight:600;margin-bottom:16px;font-size:13px";
+        wrap.insertBefore(errBanner, wrap.firstChild);
+      }
+      errBanner.textContent = "Error loading clinic analytics from server: " + (e.message || e);
+    }
   }
 }
 

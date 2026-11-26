@@ -42,6 +42,26 @@ if os.path.exists(_env_path):
                 os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB upload limit
+
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify(error="File size exceeds the 10 MB limit"), 413
+
+
+@app.before_request
+def check_admin_key():
+    admin_key = os.getenv("VAAGAI_ADMIN_KEY")
+    if not admin_key:
+        return None
+    if request.method in ("POST", "PUT", "DELETE"):
+        path = request.path
+        if path.startswith("/api/inventory") or path.startswith("/api/drug-documents"):
+            key = request.headers.get("X-Admin-Key")
+            if not key or key != admin_key:
+                return jsonify(error="Unauthorized: Valid X-Admin-Key header required"), 401
+    return None
 
 # ML model loading with resilience
 try:
@@ -69,7 +89,8 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 
 def db():
-    c = sqlite3.connect(NEW_DB)
+    db_path = app.config.get("DATABASE", NEW_DB)
+    c = sqlite3.connect(db_path)
     c.row_factory = sqlite3.Row
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("""CREATE TABLE IF NOT EXISTS assessments(
@@ -184,43 +205,47 @@ def seed_initial_data():
                     item
                 )
 
+        initial_docs = [
+            (
+                "Metformin Hydrochloride (openFDA Reference)",
+                "openFDA",
+                "https://api.fda.gov/drug/label.json?search=openfda.generic_name:metformin&limit=1",
+                [
+                    "Generic Name and Class: Metformin Hydrochloride. Drug class: Biguanide (oral blood glucose lowering agent).",
+                    "Indications and Usage: Metformin hydrochloride tablets are indicated as an adjunct to diet and exercise to improve glycemic control in adults and pediatric patients 10 years of age and older with type 2 diabetes mellitus.",
+                    "Dosage and Administration: Starting dose of Metformin is 500 mg orally twice daily or 850 mg once daily, given with meals. Dosage increases should be made in increments of 500 mg weekly or 850 mg every 2 weeks, up to a maximum dose of 2550 mg daily in divided doses.",
+                    "Contraindications: Severe renal impairment (eGFR below 30 mL/min/1.73 m2), known hypersensitivity to metformin, and acute or chronic metabolic acidosis, including diabetic ketoacidosis.",
+                    "Warnings and Precautions: Lactic Acidosis - Post-marketing cases of metformin-associated lactic acidosis have resulted in death, hypothermia, hypotension, and resistant bradyarrhythmias. Discontinue immediately if lactic acidosis is suspected."
+                ]
+            ),
+            (
+                "Amoxicillin (openFDA Reference)",
+                "openFDA",
+                "https://api.fda.gov/drug/label.json?search=openfda.generic_name:amoxicillin&limit=1",
+                [
+                    "Generic Name and Class: Amoxicillin (Amoxicillin Trihydrate). Drug class: Penicillin-class antibacterial (beta-lactam antibacterial).",
+                    "Indications and Usage: Amoxicillin is a penicillin-class antibacterial indicated in the treatment of infections due to susceptible strains of designated microorganisms in ear, nose, and throat, genitourinary tract, skin and skin structure, and lower respiratory tract.",
+                    "Dosage and Administration: Adults: 250 mg to 500 mg every 8 hours or 500 mg to 875 mg every 12 hours depending on the site and severity of infection. Treatment should be continued for a minimum of 48 to 72 hours beyond the time that the patient becomes asymptomatic.",
+                    "Contraindications: Amoxicillin is contraindicated in patients with a history of serious hypersensitivity reactions (e.g., anaphylaxis or Stevens-Johnson syndrome) to amoxicillin or other beta-lactam antibacterial drugs.",
+                    "Warnings and Precautions: Serious and occasionally fatal hypersensitivity (anaphylactic) reactions have been reported in patients on penicillin therapy. Clostridium difficile-associated diarrhea (CDAD) has been reported."
+                ]
+            ),
+            (
+                "Atorvastatin Calcium (openFDA Reference)",
+                "openFDA",
+                "https://api.fda.gov/drug/label.json?search=openfda.generic_name:atorvastatin&limit=1",
+                [
+                    "Generic Name and Class: Atorvastatin Calcium. Drug class: HMG-CoA reductase inhibitor (statin).",
+                    "Indications and Usage: Atorvastatin calcium tablets are an HMG-CoA reductase inhibitor indicated as an adjunct to diet to reduce elevated total-C, LDL-C, apo B, and TG levels, and to increase HDL-C in patients with primary hyperlipidemia and mixed dyslipidemia.",
+                    "Dosage and Administration: Recommended starting dose is 10 to 20 mg once daily. Doses range from 10 to 80 mg once daily, taken at any time of day, with or without food. Assess lipid levels within 2 to 4 weeks.",
+                    "Contraindications: Active liver disease or unexplained persistent elevations in hepatic transaminases. Hypersensitivity to any component of this medication. Pregnancy and lactation.",
+                    "Warnings and Precautions: Myopathy and Rhabdomyolysis - Rare cases of rhabdomyolysis with acute renal failure secondary to myoglobinuria have been reported. Instruct patients to report promptly unexplained muscle pain, tenderness, or weakness."
+                ]
+            )
+        ]
+
         doc_count = c.execute("SELECT COUNT(*) as count FROM drug_documents").fetchone()["count"]
         if doc_count == 0:
-            initial_docs = [
-                (
-                    "Metformin Hydrochloride (openFDA Reference)",
-                    "openFDA",
-                    "https://api.fda.gov/drug/label.json?search=openfda.generic_name:metformin&limit=1",
-                    [
-                        "Indications and Usage: Metformin hydrochloride tablets are indicated as an adjunct to diet and exercise to improve glycemic control in adults and pediatric patients 10 years of age and older with type 2 diabetes mellitus.",
-                        "Dosage and Administration: Starting dose of Metformin is 500 mg orally twice daily or 850 mg once daily, given with meals. Dosage increases should be made in increments of 500 mg weekly or 850 mg every 2 weeks, up to a maximum dose of 2550 mg daily in divided doses.",
-                        "Contraindications: Severe renal impairment (eGFR below 30 mL/min/1.73 m2), known hypersensitivity to metformin, and acute or chronic metabolic acidosis, including diabetic ketoacidosis.",
-                        "Warnings and Precautions: Lactic Acidosis - Post-marketing cases of metformin-associated lactic acidosis have resulted in death, hypothermia, hypotension, and resistant bradyarrhythmias. Discontinue immediately if lactic acidosis is suspected."
-                    ]
-                ),
-                (
-                    "Amoxicillin (openFDA Reference)",
-                    "openFDA",
-                    "https://api.fda.gov/drug/label.json?search=openfda.generic_name:amoxicillin&limit=1",
-                    [
-                        "Indications and Usage: Amoxicillin is a penicillin-class antibacterial indicated in the treatment of infections due to susceptible strains of designated microorganisms in ear, nose, and throat, genitourinary tract, skin and skin structure, and lower respiratory tract.",
-                        "Dosage and Administration: Adults: 250 mg to 500 mg every 8 hours or 500 mg to 875 mg every 12 hours depending on the site and severity of infection. Treatment should be continued for a minimum of 48 to 72 hours beyond the time that the patient becomes asymptomatic.",
-                        "Contraindications: Amoxicillin is contraindicated in patients with a history of serious hypersensitivity reactions (e.g., anaphylaxis or Stevens-Johnson syndrome) to amoxicillin or other beta-lactam antibacterial drugs.",
-                        "Warnings and Precautions: Serious and occasionally fatal hypersensitivity (anaphylactic) reactions have been reported in patients on penicillin therapy. Clostridium difficile-associated diarrhea (CDAD) has been reported."
-                    ]
-                ),
-                (
-                    "Atorvastatin Calcium (openFDA Reference)",
-                    "openFDA",
-                    "https://api.fda.gov/drug/label.json?search=openfda.generic_name:atorvastatin&limit=1",
-                    [
-                        "Indications and Usage: Atorvastatin calcium tablets are an HMG-CoA reductase inhibitor indicated as an adjunct to diet to reduce elevated total-C, LDL-C, apo B, and TG levels, and to increase HDL-C in patients with primary hyperlipidemia and mixed dyslipidemia.",
-                        "Dosage and Administration: Recommended starting dose is 10 to 20 mg once daily. Doses range from 10 to 80 mg once daily, taken at any time of day, with or without food. Assess lipid levels within 2 to 4 weeks.",
-                        "Contraindications: Active liver disease or unexplained persistent elevations in hepatic transaminases. Hypersensitivity to any component of this medication. Pregnancy and lactation.",
-                        "Warnings and Precautions: Myopathy and Rhabdomyolysis - Rare cases of rhabdomyolysis with acute renal failure secondary to myoglobinuria have been reported. Instruct patients to report promptly unexplained muscle pain, tenderness, or weakness."
-                    ]
-                )
-            ]
             for title, stype, surl, chunks in initial_docs:
                 cur = c.execute("INSERT INTO drug_documents(title, source_type, source_url) VALUES (?, ?, ?)",
                                 (title, stype, surl))
@@ -228,6 +253,22 @@ def seed_initial_data():
                 for ch in chunks:
                     c.execute("INSERT INTO drug_chunks(document_id, content, embedding) VALUES (?, ?, ?)",
                               (did, ch, json.dumps(embed_text(ch))))
+        else:
+            # Backfill "Generic Name and Class" chunk into seeded reference docs if missing
+            for title, stype, surl, chunks in initial_docs:
+                doc = c.execute("SELECT id FROM drug_documents WHERE title = ?", (title,)).fetchone()
+                if doc:
+                    has_gen = c.execute(
+                        "SELECT COUNT(*) as count FROM drug_chunks WHERE document_id = ? AND content LIKE 'Generic Name and Class%'",
+                        (doc["id"],)
+                    ).fetchone()["count"]
+                    if not has_gen:
+                        gen_chunk = next((ch for ch in chunks if ch.startswith("Generic Name and Class")), None)
+                        if gen_chunk:
+                            c.execute(
+                                "INSERT INTO drug_chunks(document_id, content, embedding) VALUES (?, ?, ?)",
+                                (doc["id"], gen_chunk, json.dumps(embed_text(gen_chunk)))
+                            )
 
 
 seed_initial_data()
@@ -359,6 +400,11 @@ def logo():
     return send_from_directory(os.path.join(HERE, "static"), "logo.png")
 
 
+@app.get("/favicon.ico")
+def favicon():
+    return send_from_directory(os.path.join(HERE, "static"), "logo.png")
+
+
 # Risk Screening API Routes
 @app.post("/api/predict")
 def predict():
@@ -479,9 +525,62 @@ def chat():
 # =========================================================================
 # FEATURE A: Pharmacy Stock Management Dashboard Routes
 # =========================================================================
+def validate_inventory_payload(data):
+    medicine_name = str(data.get("medicine_name", "")).strip()
+    if not medicine_name:
+        return None, jsonify(error="Medicine name is required"), 400
+
+    raw_current = data.get("current_stock")
+    if raw_current is None or str(raw_current).strip() == "":
+        return None, jsonify(error="Current stock is required"), 400
+    try:
+        current_stock = int(raw_current)
+    except (TypeError, ValueError):
+        return None, jsonify(error="Current stock must be a valid integer"), 400
+    if current_stock < 0:
+        return None, jsonify(error="Current stock cannot be negative"), 400
+
+    raw_min = data.get("minimum_required_stock")
+    if raw_min is None or str(raw_min).strip() == "":
+        minimum_required_stock = 10
+    else:
+        try:
+            minimum_required_stock = int(raw_min)
+        except (TypeError, ValueError):
+            return None, jsonify(error="Minimum required stock must be a valid integer"), 400
+        if minimum_required_stock < 0:
+            return None, jsonify(error="Minimum required stock cannot be negative"), 400
+
+    raw_act = data.get("active_ingredient")
+    active_ingredient = str(raw_act).strip() if raw_act is not None else None
+    if active_ingredient == "":
+        active_ingredient = None
+
+    raw_expiry = data.get("expiry_date")
+    expiry_date = None
+    if raw_expiry is not None and str(raw_expiry).strip() != "":
+        clean_expiry = str(raw_expiry).strip()
+        try:
+            parsed_date = datetime.date.fromisoformat(clean_expiry)
+            if clean_expiry != parsed_date.isoformat():
+                return None, jsonify(error="Expiry date must be a valid date in YYYY-MM-DD format"), 400
+            expiry_date = parsed_date.isoformat()
+        except (ValueError, TypeError):
+            return None, jsonify(error="Expiry date must be a valid date in YYYY-MM-DD format"), 400
+
+    return {
+        "medicine_name": medicine_name,
+        "active_ingredient": active_ingredient,
+        "current_stock": current_stock,
+        "minimum_required_stock": minimum_required_stock,
+        "expiry_date": expiry_date
+    }, None, None
+
+
 @app.get("/api/inventory")
 def get_inventory():
     today = datetime.date.today()
+    today_iso = today.isoformat()
     near_expiry_limit = today + datetime.timedelta(days=30)
     limit_iso = near_expiry_limit.isoformat()
 
@@ -491,6 +590,7 @@ def get_inventory():
     items = []
     low_stock_count = 0
     near_expiry_count = 0
+    expired_count = 0
 
     for r in rows:
         d = dict(r)
@@ -499,15 +599,19 @@ def get_inventory():
         exp = str(d["expiry_date"]).strip() if d["expiry_date"] else None
 
         is_low = current <= minimum
+        is_expired = bool(exp and exp < today_iso)
         is_near = bool(exp and exp <= limit_iso)
 
         if is_low:
             low_stock_count += 1
         if is_near:
             near_expiry_count += 1
+        if is_expired:
+            expired_count += 1
 
         d["is_low_stock"] = is_low
         d["is_near_expiry"] = is_near
+        d["is_expired"] = is_expired
         d["suggested_reorder_qty"] = max(0, minimum - current)
         items.append(d)
 
@@ -516,7 +620,8 @@ def get_inventory():
         "summary": {
             "total_items": len(items),
             "low_stock_count": low_stock_count,
-            "near_expiry_count": near_expiry_count
+            "near_expiry_count": near_expiry_count,
+            "expired_count": expired_count
         }
     })
 
@@ -524,28 +629,16 @@ def get_inventory():
 @app.post("/api/inventory")
 def add_inventory():
     data = request.get_json(silent=True) or {}
-    medicine_name = str(data.get("medicine_name", "")).strip()
-    if not medicine_name:
-        return jsonify(error="Medicine name is required"), 400
-
-    try:
-        current_stock = int(data.get("current_stock"))
-    except (TypeError, ValueError):
-        return jsonify(error="Current stock must be a valid integer"), 400
-
-    try:
-        minimum_required_stock = int(data.get("minimum_required_stock", 10))
-    except (TypeError, ValueError):
-        minimum_required_stock = 10
-
-    active_ingredient = str(data.get("active_ingredient", "")).strip() or None
-    expiry_date = str(data.get("expiry_date", "")).strip() or None
+    item_data, err_resp, code = validate_inventory_payload(data)
+    if err_resp:
+        return err_resp, code
 
     with db() as c:
         cur = c.execute(
             """INSERT INTO inventory(medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date)
                VALUES (?, ?, ?, ?, ?)""",
-            (medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date)
+            (item_data["medicine_name"], item_data["active_ingredient"], item_data["current_stock"],
+             item_data["minimum_required_stock"], item_data["expiry_date"])
         )
         new_id = cur.lastrowid
 
@@ -554,30 +647,23 @@ def add_inventory():
 
 @app.put("/api/inventory/<int:item_id>")
 def update_inventory(item_id):
+    with db() as c:
+        existing = c.execute("SELECT id FROM inventory WHERE id = ?", (item_id,)).fetchone()
+        if not existing:
+            return jsonify(error="Item not found"), 404
+
     data = request.get_json(silent=True) or {}
-    medicine_name = str(data.get("medicine_name", "")).strip()
-    if not medicine_name:
-        return jsonify(error="Medicine name is required"), 400
-
-    try:
-        current_stock = int(data.get("current_stock"))
-    except (TypeError, ValueError):
-        return jsonify(error="Current stock must be a valid integer"), 400
-
-    try:
-        minimum_required_stock = int(data.get("minimum_required_stock", 10))
-    except (TypeError, ValueError):
-        minimum_required_stock = 10
-
-    active_ingredient = str(data.get("active_ingredient", "")).strip() or None
-    expiry_date = str(data.get("expiry_date", "")).strip() or None
+    item_data, err_resp, code = validate_inventory_payload(data)
+    if err_resp:
+        return err_resp, code
 
     with db() as c:
         c.execute(
             """UPDATE inventory
                SET medicine_name = ?, active_ingredient = ?, current_stock = ?, minimum_required_stock = ?, expiry_date = ?
                WHERE id = ?""",
-            (medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date, item_id)
+            (item_data["medicine_name"], item_data["active_ingredient"], item_data["current_stock"],
+             item_data["minimum_required_stock"], item_data["expiry_date"], item_id)
         )
 
     return jsonify(ok=True)
@@ -586,6 +672,9 @@ def update_inventory(item_id):
 @app.delete("/api/inventory/<int:item_id>")
 def delete_inventory(item_id):
     with db() as c:
+        existing = c.execute("SELECT id FROM inventory WHERE id = ?", (item_id,)).fetchone()
+        if not existing:
+            return jsonify(error="Item not found"), 404
         c.execute("DELETE FROM inventory WHERE id = ?", (item_id,))
     return jsonify(ok=True)
 
@@ -621,6 +710,69 @@ def export_low_stock():
 # =========================================================================
 # FEATURE B: Drug Information Chatbot (RAG) Routes
 # =========================================================================
+INTENT_MAPPINGS = [
+    (["used for", "indicated", "treat", "what is"], ["Indications and Usage"]),
+    (["dose", "dosage", "how much", "how often", "maximum"], ["Dosage and Administration"]),
+    (["warning", "precaution", "side effect", "adverse"], ["Warnings and Precautions", "Adverse Reactions"]),
+    (["contraindicated", "who should not", "avoid"], ["Contraindications"]),
+    (["generic", "alternative", "substitute", "brand", "same as"], ["Generic Name and Class", "Description and Generic Information"]),
+]
+
+INTENT_KEYWORDS = set()
+for _kws, _ in INTENT_MAPPINGS:
+    for _kw in _kws:
+        for _w in _kw.split():
+            INTENT_KEYWORDS.add(_w.lower())
+
+
+def extract_known_drugs(rows):
+    """Extract known drug entities from document titles and 'Generic Name and Class' chunks.
+    Returns:
+      doc_drugs: dict mapping document_id -> set of drug keywords (lowercase)
+      all_drugs: set of all drug keywords (lowercase)
+    """
+    doc_drugs = {}
+    all_drugs = set()
+    noise_words = {
+        "reference", "label", "openfda", "uploaded", "document", "tablets", "capsules",
+        "prescribing", "information", "guide", "package", "insert", "patient", "class",
+        "pharmacologic", "name", "generic", "brand", "drug", "for", "and", "the"
+    }
+
+    for r in rows:
+        did = r["document_id"]
+        if did not in doc_drugs:
+            doc_drugs[did] = set()
+
+        # 1. From title
+        clean_title = re.sub(r"\(.*?\)", "", r["title"]).strip().lower()
+        for w in re.findall(r"\b[a-z]{3,}\b", clean_title):
+            if w not in noise_words and w not in STOP_WORDS:
+                doc_drugs[did].add(w)
+                all_drugs.add(w)
+
+        # 2. From 'Generic Name and Class' chunks
+        content = r["content"]
+        if "generic name" in content.lower():
+            for line in content.splitlines():
+                line_lower = line.lower().strip()
+                if line_lower.startswith("generic name:") or line_lower.startswith("generic name and class:"):
+                    val = line.split(":", 1)[1]
+                    for w in re.findall(r"\b[a-z]{3,}\b", val.lower()):
+                        if w not in noise_words and w not in STOP_WORDS:
+                            doc_drugs[did].add(w)
+                            all_drugs.add(w)
+                elif line_lower.startswith("brand name(s):") or line_lower.startswith("brand name:"):
+                    val = line.split(":", 1)[1]
+                    for b in val.split(","):
+                        for w in re.findall(r"\b[a-z]{3,}\b", b.lower()):
+                            if w not in noise_words and w not in STOP_WORDS:
+                                doc_drugs[did].add(w)
+                                all_drugs.add(w)
+
+    return doc_drugs, all_drugs
+
+
 @app.post("/api/drug-chat")
 def drug_chat():
     data = request.get_json(silent=True) or {}
@@ -628,30 +780,93 @@ def drug_chat():
     if not question:
         return jsonify(error="Question is required"), 400
 
-    q_emb = embed_text(question)
+    q_lower = question.lower()
+    q_tokens = re.findall(r"\b[a-z0-9]+\b", q_lower)
+    subject_tokens = [t for t in q_tokens if t not in STOP_WORDS and t not in INTENT_KEYWORDS]
 
+    # 1. Match query intent to section headings
+    matched_headings = []
+    for keywords, headings in INTENT_MAPPINGS:
+        for kw in keywords:
+            if re.search(r"\b" + re.escape(kw) + r"\b", q_lower):
+                for h in headings:
+                    if h not in matched_headings:
+                        matched_headings.append(h)
+                break
+
+    # 2. Extract known drug names from knowledge base documents and match with question
     with db() as c:
         rows = c.execute("""
-            SELECT dc.id, dc.content, dc.embedding, d.title, d.source_type, d.source_url
+            SELECT dc.id, dc.document_id, dc.content, dc.embedding, d.title, d.source_type, d.source_url
             FROM drug_chunks dc
             JOIN drug_documents d ON dc.document_id = d.id
         """).fetchall()
 
+    if not rows:
+        return jsonify({
+            "answer": "Information for this query was not found in the Vaagai Pharm drug knowledge base. Please check the drug name or upload relevant documentation in Manage Sources.",
+            "sources": []
+        })
+
+    # Gather known drug names from titles and chunks at query time
+    doc_drugs, all_known_drugs = extract_known_drugs(rows)
+    matched_drugs = [d for d in all_known_drugs if re.search(r"\b" + re.escape(d) + r"\b", q_lower)]
+
+    # Guardrail: A question with no recognized drug name (or unindexed drug, or off-topic)
+    # must not return an arbitrary drug's chunk as if it answered.
+    if not matched_drugs:
+        return jsonify({
+            "answer": "Information for this query was not found in the Vaagai Pharm drug knowledge base. Please check the drug name or specify which medicine you are asking about.",
+            "sources": []
+        })
+
+    q_emb = embed_text(question)
+
     scored = []
     for r in rows:
+        content = r["content"]
+        content_lower = content.lower()
+        title_lower = r["title"].lower()
+
+        # If question contains subject tokens outside intent keywords, at least one must match chunk, title, or doc drug names
+        if subject_tokens:
+            doc_entity_names = doc_drugs.get(r["document_id"], set())
+            if not any(st in content_lower or st in title_lower or st in doc_entity_names for st in subject_tokens):
+                continue
+
         try:
             emb = json.loads(r["embedding"])
             sim = cosine_similarity(q_emb, emb)
-            scored.append((sim, r))
         except Exception:
             continue
 
+        score = sim
+
+        # Drug name boost: boost chunks belonging to the drug mentioned in question
+        if matched_drugs:
+            doc_entity_names = doc_drugs.get(r["document_id"], set())
+            if any(md in doc_entity_names or md in content_lower or md in title_lower for md in matched_drugs):
+                score += 0.35
+            else:
+                score -= 0.20
+
+        # Section heading intent boost: boost chunks whose content starts with matched heading
+        if matched_headings:
+            for h in matched_headings:
+                h_l = h.lower()
+                if (content_lower.startswith(h_l) or
+                    content_lower.startswith(h_l + ":") or
+                    content_lower.startswith(h_l + " for")):
+                    score += 0.25
+                    break
+
+        scored.append((score, r))
+
     scored.sort(key=lambda x: x[0], reverse=True)
-    top_items = scored[:5]
 
     # Explicit threshold check: if no relevant chunk found above threshold
     threshold = 0.12
-    valid_chunks = [item for item in top_items if item[0] >= threshold]
+    valid_chunks = [item for item in scored if item[0] >= threshold]
 
     if not valid_chunks:
         return jsonify({
@@ -662,7 +877,7 @@ def drug_chat():
     # Prepare context and sources
     context_blocks = []
     sources_dict = {}
-    for score_val, r in valid_chunks:
+    for score_val, r in valid_chunks[:5]:
         context_blocks.append(f"Document: {r['title']}\n{r['content']}")
         key = (r["title"], r["source_type"], r["source_url"])
         if key not in sources_dict:
@@ -674,6 +889,13 @@ def drug_chat():
 
     combined_context = "\n\n---\n\n".join(context_blocks)
     sources = list(sources_dict.values())
+
+    # Check if question or any retrieved chunk concerns dosage
+    is_dosage_query = (
+        any(re.search(r"\b" + re.escape(w) + r"\b", q_lower) for w in ["dose", "dosage", "doses", "dosing", "how much", "how often", "maximum", "administration"])
+        or any("dosage and administration" in item[1]["content"][:60].lower() for item in valid_chunks[:2])
+    )
+    dosage_warning = "Dosage information must be verified by a pharmacist before dispensing."
 
     # Call Groq LLM with strict grounding prompt
     key = os.getenv("GROQ_API_KEY")
@@ -710,17 +932,32 @@ def drug_chat():
             with urllib.request.urlopen(req, timeout=25) as r:
                 ans = (json.load(r)["choices"][0]["message"]["content"] or "").strip()
                 if ans:
+                    if is_dosage_query and dosage_warning not in ans:
+                        ans += f"\n\n{dosage_warning}"
                     return jsonify({"answer": ans, "sources": sources})
         except Exception as e:
             print("[drug-chat groq error]", type(e).__name__, e)
 
-    # Deterministic fallback answer directly from retrieved chunks
-    top_chunk_snippet = valid_chunks[0][1]["content"]
-    fallback_ans = (
-        f"From {valid_chunks[0][1]['title']}:\n\n"
-        f"{top_chunk_snippet}\n\n"
-        "(Reference information only. Always verify with official drug labeling and a registered pharmacist.)"
-    )
+    # Deterministic fallback answer: top 2 relevant chunks (same drug preferred), labeled with source title
+    top_1 = valid_chunks[0][1]
+    chosen_chunks = [top_1]
+
+    if len(valid_chunks) > 1:
+        same_doc_chunk = next((item[1] for item in valid_chunks[1:] if item[1]["document_id"] == top_1["document_id"]), None)
+        if same_doc_chunk:
+            chosen_chunks.append(same_doc_chunk)
+        else:
+            chosen_chunks.append(valid_chunks[1][1])
+
+    chunk_paragraphs = []
+    for ch in chosen_chunks:
+        chunk_paragraphs.append(f"From {ch['title']}:\n\n{ch['content']}")
+
+    fallback_ans = "\n\n".join(chunk_paragraphs) + "\n\n(Reference information only. Always verify with official drug labeling and a registered pharmacist.)"
+
+    if is_dosage_query and dosage_warning not in fallback_ans:
+        fallback_ans += f"\n\n{dosage_warning}"
+
     return jsonify({"answer": fallback_ans, "sources": sources})
 
 
@@ -737,6 +974,14 @@ def upload_drug_document():
         return jsonify(error="Invalid file"), 400
 
     filename = f.filename
+    if not filename.lower().endswith(".pdf"):
+        return jsonify(error="Only .pdf files are accepted"), 400
+
+    header = f.stream.read(4)
+    f.stream.seek(0)
+    if not header.startswith(b"%PDF"):
+        return jsonify(error="Invalid PDF: File must begin with %PDF header"), 400
+
     title = str(request.form.get("title", "")).strip() or filename
 
     try:
@@ -805,20 +1050,55 @@ def fetch_openfda():
 
     label = results[0]
     title = f"{drug_name.title()} (openFDA Label)"
+    openfda = label.get("openfda", {})
 
+    # Build sections
+    chunks_to_insert = []
+
+    # 1. Generic Name and Class (always stored, regardless of description)
+    gen_parts = []
+    generic_name = openfda.get("generic_name")
+    brand_name = openfda.get("brand_name")
+    pharm_class = openfda.get("pharm_class_epc") or openfda.get("pharm_class_cs")
+
+    if generic_name:
+        g_val = ", ".join(generic_name) if isinstance(generic_name, list) else str(generic_name)
+        gen_parts.append(f"Generic Name: {g_val}")
+    else:
+        gen_parts.append(f"Generic Name: {drug_name.title()}")
+
+    if brand_name:
+        b_val = ", ".join(brand_name) if isinstance(brand_name, list) else str(brand_name)
+        gen_parts.append(f"Brand Name(s): {b_val}")
+
+    if pharm_class:
+        p_val = ", ".join(pharm_class) if isinstance(pharm_class, list) else str(pharm_class)
+        gen_parts.append(f"Pharmacologic Class: {p_val}")
+
+    gen_chunk_text = f"Generic Name and Class for {drug_name.title()}:\n" + "\n".join(gen_parts)
+    chunks_to_insert.append(gen_chunk_text)
+
+    # 2. Other clinical sections (capped to sensible size before chunking)
     sections = [
         ("Indications and Usage", label.get("indications_and_usage")),
         ("Dosage and Administration", label.get("dosage_and_administration")),
         ("Warnings and Precautions", label.get("warnings") or label.get("warnings_and_cautions")),
+        ("Adverse Reactions", label.get("adverse_reactions")),
         ("Contraindications", label.get("contraindications")),
-        ("Description and Generic Information", label.get("description") or label.get("openfda", {}).get("generic_name"))
     ]
 
-    chunks_to_insert = []
+    if label.get("description"):
+        sections.append(("Description", label.get("description")))
+
+    MAX_SECTION_WORDS = 1500  # Cap very long sections before chunking
+
     for heading, field_val in sections:
         if not field_val:
             continue
         text_val = " ".join(field_val) if isinstance(field_val, list) else str(field_val)
+        words = text_val.split()
+        if len(words) > MAX_SECTION_WORDS:
+            text_val = " ".join(words[:MAX_SECTION_WORDS]) + "..."
         subchunks = chunk_text(f"{heading} for {drug_name.title()}:\n{text_val}")
         for sc in subchunks:
             chunks_to_insert.append(sc)
@@ -826,7 +1106,28 @@ def fetch_openfda():
     if not chunks_to_insert:
         return jsonify(error="openFDA record had no clinical text sections to extract"), 400
 
+    # Prevent duplicates: if document with same source_type 'openFDA' and same drug name/source_url exists,
+    # replace its chunks (delete old document, insert new)
+    refreshed = False
     with db() as c:
+        existing_docs = c.execute(
+            """SELECT id FROM drug_documents
+               WHERE source_type = 'openFDA' AND (LOWER(title) = ? OR source_url = ?)""",
+            (title.lower(), url)
+        ).fetchall()
+
+        if not existing_docs:
+            existing_docs = c.execute(
+                """SELECT id FROM drug_documents
+                   WHERE source_type = 'openFDA' AND LOWER(title) LIKE ?""",
+                (f"%{drug_name.lower()}%",)
+            ).fetchall()
+
+        if existing_docs:
+            refreshed = True
+            for ed in existing_docs:
+                c.execute("DELETE FROM drug_documents WHERE id = ?", (ed["id"],))
+
         cur = c.execute(
             "INSERT INTO drug_documents(title, source_type, source_url) VALUES (?, ?, ?)",
             (title, "openFDA", url)
@@ -839,13 +1140,15 @@ def fetch_openfda():
                 (doc_id, chunk, json.dumps(emb))
             )
 
-    return jsonify({
+    resp_data = {
         "ok": True,
         "document_id": doc_id,
         "title": title,
         "chunks_count": len(chunks_to_insert),
-        "source_url": url
-    }), 201
+        "source_url": url,
+        "refreshed": refreshed
+    }
+    return jsonify(resp_data), 201
 
 
 @app.get("/api/drug-documents")
@@ -865,6 +1168,9 @@ def list_drug_documents():
 @app.delete("/api/drug-documents/<int:doc_id>")
 def delete_drug_document(doc_id):
     with db() as c:
+        existing = c.execute("SELECT id FROM drug_documents WHERE id = ?", (doc_id,)).fetchone()
+        if not existing:
+            return jsonify(error="Document not found"), 404
         c.execute("DELETE FROM drug_documents WHERE id = ?", (doc_id,))
     return jsonify(ok=True)
 
