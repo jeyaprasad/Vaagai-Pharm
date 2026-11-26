@@ -1,92 +1,127 @@
-# Uyir Score - AI-Based Disease Risk Prediction Using Clinical Data Analytics
+# Vaagai Pharm - Pharmacy & Clinical Intelligence Platform
 
-## Overview
-Diabetes is often diagnosed late, after metabolic damage or microvascular complications have already begun. Uyir Score is a lightweight, privacy-preserving clinical screening and analytics platform that identifies elevated diabetes risk early using routine clinical measurements.
-
-A Random Forest classifier trained on the Pima Indians Diabetes dataset estimates individualized diabetes risk from fasting glucose, body mass index (BMI), age, blood pressure, and related clinical metrics. Attributable risk factors are extracted via what-if counterfactual analysis, and a built-in clinical guidance engine generates clear, plain-language explanations and actionable preventive lifestyle guidance. If a Groq API key is configured, it uses that for enhanced explanations.
-
-For healthcare organisations and clinicians, an interactive Provider Dashboard provides cohort-level analytics, live assessment tracking, clinical use cases, and an illustrative early-screening savings estimator.
+> **Vaagai** (meaning *"victory tree / banyan"* in Tamil) symbolizes enduring strength, resilience, and holistic healing. **Vaagai Pharm** combines community pharmacy stock management, retrieval-augmented drug intelligence (RAG), and preventive clinical risk screening into a unified, privacy-first platform.
 
 ---
 
-## Project Structure
+## Architecture Overview
+
+Vaagai Pharm operates on a lightweight, dependency-free architecture: **Flask + SQLite + vanilla HTML/CSS/JS** with Groq API for generative intelligence (and deterministic offline fallbacks).
 
 ```
-viral-health/
-├── app.py                  # Flask web server (entry point)
-├── requirements.txt        # Python dependencies
-├── .env                    # Secret keys — never committed (see below)
-├── .gitignore
+vaagai-pharm/
+├── app.py                      # Unified Flask web backend and REST API
+├── requirements.txt            # Python dependencies
+├── .env                        # Environment secrets (GROQ_API_KEY)
 ├── README.md
 │
-├── ml/                     # Machine learning artefacts & training code
-│   ├── train_model.py      # Training script
-│   ├── model.joblib        # Trained model bundle
-│   ├── metrics.json        # Holdout & OOF evaluation metrics
+├── ml/                         # Clinical ML models & knowledge bases
+│   ├── model.joblib            # Trained Random Forest classifier
+│   ├── metrics.json            # Model evaluation metrics
+│   ├── chatbot.py              # Clinical screening chatbot engine
 │   └── data/
-│       └── diabetes.csv    # Raw Pima Indians Diabetes dataset
+│       ├── diabetes.csv        # Pima Indians diabetes study reference
+│       └── medical_faqs.json   # Deterministic clinical FAQ base
 │
-├── static/                 # Static assets served by Flask
-│   └── logo.png
+├── templates/
+│   └── index.html              # Responsive single-page application (4 primary tabs)
 │
-├── templates/              # HTML templates served by Flask
-│   └── index.html          # Single-page frontend application
+├── static/
+│   └── logo.png                # Brand logo asset
 │
-└── instance/               # Runtime data — never committed
-    └── uyirscore.db        # SQLite assessment log (auto-created)
+└── instance/
+    └── vaagaipharm.db          # Unified SQLite database (auto-created & migrated)
 ```
 
 ---
 
-## Limitations
-- **Dataset Specificity:** The classification model is trained on the Pima Indians Diabetes dataset (768 adult females of Pima heritage, aged 21 and older). Risk patterns may not generalize accurately to other ethnic groups, male patients, or broader demographic cohorts.
-- **Demo Data:** All baseline analytics, cohort figures, and savings scenarios are illustrative demo figures. They must not be treated as actual institutional, financial, or population health forecasts.
-- **Screening Tool Only:** Uyir Score is a statistical risk screening tool, not a diagnostic medical device. It should never substitute for formal clinical evaluations, laboratory diagnostics, or professional clinician judgment.
+## Core Capabilities
+
+### 1. Pharmacy Stock Management Dashboard (`#dashboard` - Default Landing)
+- **Real-Time Inventory Tracking:** Stock levels, active ingredients, minimum required quantities, and batch expiration dates.
+- **Rule-Based Stock Alert Badges:**
+  - `Low Stock` (red): Current stock &le; minimum required threshold.
+  - `Near Expiry` (amber): Expiry date &le; today + 30 days.
+  - `OK` (neutral green): Healthy stock and valid expiry.
+- **Dynamic Sorting & Instant Filtering:** Search-as-you-type filter by medicine name or active ingredient; sortable columns.
+- **Inventory CRUD:** Add, update, and delete medicines with instant live modal forms.
+- **Low-Stock CSV Export:** One-click generation and download of low-stock items with suggested reorder quantities:
+  `Suggested Reorder Qty = max(0, minimum_required_stock - current_stock)`.
+
+### 2. Drug Information Chatbot — RAG (`#drug-chat`)
+- **Strict Retrieval-Augmented Generation:** Uses a 256-dimensional semantic hashing embedder and cosine similarity over chunked medical texts.
+- **Anti-Hallucination Guardrails:** If no relevant chunk matches above threshold, VaagaiBot explicitly reports that the drug or query is not present in the ingested knowledge base, refusing to guess.
+- **Verified Source Attribution:** Responses link directly to openFDA source records or local PDF monograph titles.
+- **Source Management & Ingestion:**
+  - One-click ingestion from the official **US openFDA API** (`indications_and_usage`, `dosage_and_administration`, `warnings`, `adverse_reactions`).
+  - Multipart **PDF monograph upload** with automated text extraction (`pypdf`), chunking, and embedding.
+
+### 3. Diabetes Risk Screening (`#test`)
+- **2-Minute Clinical Risk Wizard:** Evaluates routine metrics (glucose, BMI, blood pressure, age, pregnancies, pedigree) using a Random Forest classifier.
+- **Attributable Factor Analysis:** What-if counterfactual explanations identifying personalized lifestyle targets.
+- **Downloadable & Printable Clinical Reports:** Plain-language guidance with local storage and instant report sheet printing.
+
+### 4. Clinic Analytics Dashboard (`#clinics`)
+- **Cohort Performance:** In-depth evaluation metrics (Recall, Specificity, Brier Score, ROC-AUC) on the reference study.
+- **Live Local Audit Log:** Anonymous log of recent screenings performed on the device.
 
 ---
 
-## Step-by-Step Run Instructions (Windows PowerShell)
+## API Endpoints
 
-1. **Create the Python virtual environment:**
-   ```powershell
-   python -m venv venv
-   ```
+### Pharmacy Stock (`/api/inventory`)
+- `GET /api/inventory` — List all medicines with computed `is_low_stock` and `is_near_expiry` flags.
+- `POST /api/inventory` — Add a new medicine item.
+- `PUT /api/inventory/<id>` — Update an existing medicine item.
+- `DELETE /api/inventory/<id>` — Delete a medicine item.
+- `GET /api/inventory/export-low-stock` — Download CSV of low-stock items.
 
-2. **Allow script execution for the current session (if blocked by execution policy):**
-   ```powershell
-   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-   ```
+### Drug Information RAG (`/api/drug-*`)
+- `POST /api/drug-chat` — RAG Q&A endpoint taking `{ question }` and returning `{ answer, sources }`.
+- `GET /api/drug-documents` — List all ingested documents and sources.
+- `POST /api/drug-documents/fetch-openfda` — Fetch and ingest drug label from openFDA API.
+- `POST /api/drug-documents/upload` — Ingest uploaded clinical PDF.
+- `DELETE /api/drug-documents/<id>` — Remove a document and its chunks.
 
-3. **Activate the virtual environment:**
-   ```powershell
-   .\venv\Scripts\activate
-   ```
+### Clinical Risk & Chat
+- `POST /api/predict` — Diabetes risk prediction with counterfactual explanations.
+- `GET /api/dashboard` — Clinic analytics cohort statistics.
+- `POST /api/chat` — VaagaiBot conversational diabetes guidance.
 
-4. **Install required dependencies:**
-   ```powershell
-   pip install -r requirements.txt
-   ```
+---
 
-5. **Train or verify the model and metrics (optional — model and metrics are pre-packaged):**
-   ```powershell
-   python ml/train_model.py
-   ```
+## Database Schema (`vaagaipharm.db`)
 
-6. **Configure environment variables:**
-   Create a `.env` file in the project root folder with the following placeholders:
-   ```env
-   GROQ_API_KEY=gsk_your_groq_api_key_here
-   GROQ_MODEL=openai/gpt-oss-120b
-   ```
-   *(Replace `gsk_your_groq_api_key_here` with your valid Groq API key. If omitted, Uyir Score gracefully defaults to the built-in clinical explanation fallback).*
+1. **`inventory`**: `id`, `medicine_name`, `active_ingredient`, `current_stock`, `minimum_required_stock`, `expiry_date`, `created_at`.
+2. **`drug_documents`**: `id`, `title`, `source_type` (`openFDA` / `uploaded_pdf`), `source_url`, `created_at`.
+3. **`drug_chunks`**: `id`, `document_id`, `content`, `embedding` (JSON float array).
+4. **`assessments`**: Anonymous clinical risk screening records.
 
-7. **Start the backend server:**
-   ```powershell
-   python app.py
-   ```
+*Note: If an older `instance/uyirscore.db` is present, it is automatically migrated into `instance/vaagaipharm.db` on startup.*
 
-8. **Access the application:**
-   Open your browser and navigate to:
-   ```
-   http://127.0.0.1:5000
-   ```
+---
+
+## Setup & Running Instructions
+
+### 1. Prerequisites
+- Python 3.10+ (tested on Python 3.10 – 3.14)
+
+### 2. Environment Configuration
+Create or update `.env` in the root folder:
+```env
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_MODEL=openai/gpt-oss-120b
+```
+*(If Groq API key is not supplied, the platform automatically uses built-in clinical explanations and deterministic RAG extractors).*
+
+### 3. Start the Server
+```powershell
+python app.py
+```
+
+### 4. Access the Application
+Open your web browser and visit:
+```
+http://127.0.0.1:5000
+```
+*(Defaults directly to the `#dashboard` Pharmacy Stock Management tab).*

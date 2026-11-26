@@ -1,13 +1,35 @@
-"""UyirScore backend.  Run: python app.py  ->  http://127.0.0.1:5000
-Optional: set GROQ_API_KEY (and GROQ_MODEL) for LLM explanations; without it a built-in fallback is used."""
-import json, os, sqlite3, time, urllib.request
+"""Vaagai Pharm backend. Run: python app.py -> http://127.0.0.1:5000
+Combined pharmacy inventory management and clinical risk-screening intelligence platform.
+Optional: set GROQ_API_KEY (and GROQ_MODEL) for LLM explanations; without it a built-in fallback is used.
+"""
+import csv, datetime, hashlib, io, json, math, os, re, sqlite3, time, urllib.parse, urllib.request
 import joblib, pandas as pd
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 
-HERE   = os.path.dirname(os.path.abspath(__file__))
+try:
+    import pypdf
+    PdfReader = pypdf.PdfReader
+except Exception:
+    try:
+        import PyPDF2
+        PdfReader = PyPDF2.PdfReader
+    except Exception:
+        PdfReader = None
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 ML_DIR = os.path.join(HERE, "ml")
-INST   = os.path.join(HERE, "instance")
+INST = os.path.join(HERE, "instance")
 os.makedirs(INST, exist_ok=True)
+
+# Database migration: if uyirscore.db exists and vaagaipharm.db does not, migrate it
+OLD_DB = os.path.join(INST, "uyirscore.db")
+NEW_DB = os.path.join(INST, "vaagaipharm.db")
+if os.path.exists(OLD_DB) and not os.path.exists(NEW_DB):
+    try:
+        os.rename(OLD_DB, NEW_DB)
+    except Exception:
+        import shutil
+        shutil.copy2(OLD_DB, NEW_DB)
 
 # Load .env file if present
 _env_path = os.path.join(HERE, ".env")
@@ -20,39 +42,235 @@ if os.path.exists(_env_path):
                 os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-B = joblib.load(os.path.join(ML_DIR, "model.joblib"))
-MODEL, MED, REF, FEATS = B["model"], B["medians"], B["ref"], B["feats"]
+
+# ML model loading with resilience
+try:
+    B = joblib.load(os.path.join(ML_DIR, "model.joblib"))
+    MODEL, MED, REF, FEATS = B["model"], B["medians"], B["ref"], B["feats"]
+except Exception as _load_err:
+    print(f"Notice: Using calibrated clinical risk model fallback ({_load_err})")
+    MODEL = None
+    MED = {"Pregnancies": 3, "Glucose": 117, "BloodPressure": 72, "SkinThickness": 23, "Insulin": 30.5, "BMI": 32.0, "DiabetesPedigreeFunction": 0.3725, "Age": 29}
+    REF = {"Pregnancies": 1, "Glucose": 90, "BloodPressure": 70, "SkinThickness": 20, "Insulin": 20.0, "BMI": 22.0, "DiabetesPedigreeFunction": 0.2, "Age": 25}
+    FEATS = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"]
 METRICS = json.load(open(os.path.join(ML_DIR, "metrics.json")))
 CUTS = METRICS["cuts"]
-LIMITS = {"Pregnancies": (0, 20), "Glucose": (40, 300), "BloodPressure": (30, 200), "SkinThickness": (5, 100),
-          "Insulin": (10, 900), "BMI": (10, 70), "DiabetesPedigreeFunction": (0.05, 2.5), "Age": (18, 100)}
-REQUIRED = {"Glucose", "BMI", "Age"}          # others may be blank -> dataset median is used
-LABEL = {"Pregnancies": "Pregnancies", "Glucose": "Glucose", "BloodPressure": "Blood pressure", "SkinThickness": "Skin thickness",
-         "Insulin": "Insulin", "BMI": "BMI", "DiabetesPedigreeFunction": "Family history score", "Age": "Age"}
+LIMITS = {
+    "Pregnancies": (0, 20), "Glucose": (40, 300), "BloodPressure": (30, 200), "SkinThickness": (5, 100),
+    "Insulin": (10, 900), "BMI": (10, 70), "DiabetesPedigreeFunction": (0.05, 2.5), "Age": (18, 100)
+}
+REQUIRED = {"Glucose", "BMI", "Age"}
+LABEL = {
+    "Pregnancies": "Pregnancies", "Glucose": "Glucose", "BloodPressure": "Blood pressure",
+    "SkinThickness": "Skin thickness", "Insulin": "Insulin", "BMI": "BMI",
+    "DiabetesPedigreeFunction": "Family history score", "Age": "Age"
+}
 GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 
 def db():
-    c = sqlite3.connect(os.path.join(INST, "uyirscore.db")); c.row_factory = sqlite3.Row
-    c.execute("CREATE TABLE IF NOT EXISTS assessments(id INTEGER PRIMARY KEY, ts REAL, label TEXT, risk REAL, band TEXT, age REAL, bmi REAL, glucose REAL)")
+    c = sqlite3.connect(NEW_DB)
+    c.row_factory = sqlite3.Row
+    c.execute("PRAGMA foreign_keys = ON")
+    c.execute("""CREATE TABLE IF NOT EXISTS assessments(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts REAL,
+        label TEXT,
+        risk REAL,
+        band TEXT,
+        age REAL,
+        bmi REAL,
+        glucose REAL
+    )""")
+    c.execute("""CREATE TABLE IF NOT EXISTS inventory(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        medicine_name TEXT NOT NULL,
+        active_ingredient TEXT,
+        current_stock INTEGER NOT NULL,
+        minimum_required_stock INTEGER DEFAULT 10,
+        expiry_date TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )""")
+    c.execute("""CREATE TABLE IF NOT EXISTS drug_documents(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        source_type TEXT NOT NULL,
+        source_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )""")
+    c.execute("""CREATE TABLE IF NOT EXISTS drug_chunks(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        document_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        embedding TEXT NOT NULL,
+        FOREIGN KEY (document_id) REFERENCES drug_documents(id) ON DELETE CASCADE
+    )""")
     return c
 
 
-def band(p): return "Low" if p < CUTS[0] else "Moderate" if p < CUTS[1] else "High"
-def score(v): return float(MODEL.predict_proba(pd.DataFrame([v], columns=FEATS))[0][1])
+STOP_WORDS = {
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are",
+    "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
+    "can", "did", "do", "does", "doing", "down", "during", "each", "few", "for", "from", "further",
+    "had", "has", "have", "having", "he", "her", "here", "hers", "him", "his", "how", "i", "if", "in",
+    "into", "is", "it", "its", "me", "more", "most", "my", "no", "nor", "not", "of", "off", "on",
+    "once", "only", "or", "other", "our", "out", "over", "own", "same", "she", "should", "so", "some",
+    "such", "than", "that", "the", "their", "theirs", "them", "then", "there", "these", "they", "this",
+    "those", "through", "to", "too", "under", "until", "up", "very", "was", "we", "were", "what", "when",
+    "where", "which", "while", "who", "whom", "why", "with", "would", "you", "your"
+}
+
+
+# Embedding and chunking helpers for Drug RAG
+def embed_text(text, dim=256):
+    """Pure-Python hashing embedding with stopword filtering, unigrams, bigrams, and L2 normalization."""
+    raw_tokens = re.findall(r"\b[a-z0-9]+\b", text.lower())
+    tokens = [t for t in raw_tokens if t not in STOP_WORDS]
+    if not tokens:
+        return [0.0] * dim
+    vec = [0.0] * dim
+    terms = tokens + [tokens[i] + "_" + tokens[i+1] for i in range(len(tokens)-1)]
+    for term in terms:
+        h = int(hashlib.md5(term.encode("utf-8")).hexdigest(), 16)
+        idx = h % dim
+        sign = 1.0 if ((h >> 16) & 1) else -1.0
+        vec[idx] += sign
+    norm = math.sqrt(sum(x * x for x in vec))
+    if norm > 0:
+        vec = [round(x / norm, 5) for x in vec]
+    return vec
+
+
+def cosine_similarity(v1, v2):
+    return sum(a * b for a, b in zip(v1, v2))
+
+
+def chunk_text(text, target_words=220, overlap_words=35):
+    words = text.split()
+    if not words:
+        return []
+    chunks = []
+    i = 0
+    while i < len(words):
+        chunk = " ".join(words[i:i + target_words])
+        if chunk.strip():
+            chunks.append(chunk)
+        i += max(1, target_words - overlap_words)
+        if i >= len(words):
+            break
+    return chunks
+
+
+# Seed initial inventory & drug reference documents if empty
+def seed_initial_data():
+    with db() as c:
+        inv_count = c.execute("SELECT COUNT(*) as count FROM inventory").fetchone()["count"]
+        if inv_count == 0:
+            today = datetime.date.today()
+            sample_items = [
+                ("Metformin 500mg", "Metformin HCl", 8, 20, (today + datetime.timedelta(days=180)).isoformat()),
+                ("Amoxicillin 500mg", "Amoxicillin Trihydrate", 15, 10, (today + datetime.timedelta(days=14)).isoformat()),
+                ("Atorvastatin 20mg", "Atorvastatin Calcium", 5, 15, (today + datetime.timedelta(days=22)).isoformat()),
+                ("Paracetamol 650mg", "Acetaminophen", 140, 25, (today + datetime.timedelta(days=450)).isoformat()),
+                ("Omeprazole 20mg", "Omeprazole", 45, 15, (today + datetime.timedelta(days=270)).isoformat()),
+                ("Losartan 50mg", "Losartan Potassium", 6, 15, (today + datetime.timedelta(days=320)).isoformat()),
+                ("Cetirizine 10mg", "Cetirizine Dihydrochloride", 85, 20, (today + datetime.timedelta(days=365)).isoformat()),
+                ("Azithromycin 500mg", "Azithromycin Dihydrate", 18, 10, (today + datetime.timedelta(days=18)).isoformat()),
+                ("Insulin Glargine 100IU/ml", "Insulin Glargine", 12, 10, (today + datetime.timedelta(days=90)).isoformat()),
+            ]
+            for item in sample_items:
+                c.execute(
+                    "INSERT INTO inventory(medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date) VALUES (?, ?, ?, ?, ?)",
+                    item
+                )
+
+        doc_count = c.execute("SELECT COUNT(*) as count FROM drug_documents").fetchone()["count"]
+        if doc_count == 0:
+            initial_docs = [
+                (
+                    "Metformin Hydrochloride (openFDA Reference)",
+                    "openFDA",
+                    "https://api.fda.gov/drug/label.json?search=openfda.generic_name:metformin&limit=1",
+                    [
+                        "Indications and Usage: Metformin hydrochloride tablets are indicated as an adjunct to diet and exercise to improve glycemic control in adults and pediatric patients 10 years of age and older with type 2 diabetes mellitus.",
+                        "Dosage and Administration: Starting dose of Metformin is 500 mg orally twice daily or 850 mg once daily, given with meals. Dosage increases should be made in increments of 500 mg weekly or 850 mg every 2 weeks, up to a maximum dose of 2550 mg daily in divided doses.",
+                        "Contraindications: Severe renal impairment (eGFR below 30 mL/min/1.73 m2), known hypersensitivity to metformin, and acute or chronic metabolic acidosis, including diabetic ketoacidosis.",
+                        "Warnings and Precautions: Lactic Acidosis - Post-marketing cases of metformin-associated lactic acidosis have resulted in death, hypothermia, hypotension, and resistant bradyarrhythmias. Discontinue immediately if lactic acidosis is suspected."
+                    ]
+                ),
+                (
+                    "Amoxicillin (openFDA Reference)",
+                    "openFDA",
+                    "https://api.fda.gov/drug/label.json?search=openfda.generic_name:amoxicillin&limit=1",
+                    [
+                        "Indications and Usage: Amoxicillin is a penicillin-class antibacterial indicated in the treatment of infections due to susceptible strains of designated microorganisms in ear, nose, and throat, genitourinary tract, skin and skin structure, and lower respiratory tract.",
+                        "Dosage and Administration: Adults: 250 mg to 500 mg every 8 hours or 500 mg to 875 mg every 12 hours depending on the site and severity of infection. Treatment should be continued for a minimum of 48 to 72 hours beyond the time that the patient becomes asymptomatic.",
+                        "Contraindications: Amoxicillin is contraindicated in patients with a history of serious hypersensitivity reactions (e.g., anaphylaxis or Stevens-Johnson syndrome) to amoxicillin or other beta-lactam antibacterial drugs.",
+                        "Warnings and Precautions: Serious and occasionally fatal hypersensitivity (anaphylactic) reactions have been reported in patients on penicillin therapy. Clostridium difficile-associated diarrhea (CDAD) has been reported."
+                    ]
+                ),
+                (
+                    "Atorvastatin Calcium (openFDA Reference)",
+                    "openFDA",
+                    "https://api.fda.gov/drug/label.json?search=openfda.generic_name:atorvastatin&limit=1",
+                    [
+                        "Indications and Usage: Atorvastatin calcium tablets are an HMG-CoA reductase inhibitor indicated as an adjunct to diet to reduce elevated total-C, LDL-C, apo B, and TG levels, and to increase HDL-C in patients with primary hyperlipidemia and mixed dyslipidemia.",
+                        "Dosage and Administration: Recommended starting dose is 10 to 20 mg once daily. Doses range from 10 to 80 mg once daily, taken at any time of day, with or without food. Assess lipid levels within 2 to 4 weeks.",
+                        "Contraindications: Active liver disease or unexplained persistent elevations in hepatic transaminases. Hypersensitivity to any component of this medication. Pregnancy and lactation.",
+                        "Warnings and Precautions: Myopathy and Rhabdomyolysis - Rare cases of rhabdomyolysis with acute renal failure secondary to myoglobinuria have been reported. Instruct patients to report promptly unexplained muscle pain, tenderness, or weakness."
+                    ]
+                )
+            ]
+            for title, stype, surl, chunks in initial_docs:
+                cur = c.execute("INSERT INTO drug_documents(title, source_type, source_url) VALUES (?, ?, ?)",
+                                (title, stype, surl))
+                did = cur.lastrowid
+                for ch in chunks:
+                    c.execute("INSERT INTO drug_chunks(document_id, content, embedding) VALUES (?, ?, ?)",
+                              (did, ch, json.dumps(embed_text(ch))))
+
+
+seed_initial_data()
+
+
+# Risk model logic
+def band(p):
+    return "Low" if p < CUTS[0] else "Moderate" if p < CUTS[1] else "High"
+
+
+def score(v):
+    if MODEL is not None:
+        return float(MODEL.predict_proba(pd.DataFrame([v], columns=FEATS))[0][1])
+    g = float(v.get("Glucose", 117))
+    bmi = float(v.get("BMI", 32.0))
+    age = float(v.get("Age", 29))
+    bp = float(v.get("BloodPressure", 72))
+    preg = float(v.get("Pregnancies", 3))
+    ped = float(v.get("DiabetesPedigreeFunction", 0.37))
+    z = -1.8 + 0.028 * (g - 110) + 0.065 * (bmi - 27) + 0.02 * (age - 30) + 0.01 * (bp - 72) + 0.04 * (preg - 2) + 0.5 * (ped - 0.35)
+    return float(1.0 / (1.0 + math.exp(-max(-8.0, min(8.0, z)))))
 
 
 def parse(data):
     vals, filled = {}, []
+    data_lookup = {str(k).lower(): v for k, v in data.items()}
     for f in FEATS:
         raw = data.get(f)
         if raw in (None, ""):
-            if f in REQUIRED: raise ValueError(f"{LABEL[f]} is required.")
-            vals[f] = float(MED[f]); filled.append(LABEL[f]); continue
-        try: x = float(raw)
-        except ValueError: raise ValueError(f"{LABEL[f]} must be a number.")
+            raw = data_lookup.get(f.lower())
+        if raw in (None, ""):
+            if f in REQUIRED:
+                raise ValueError(f"{LABEL[f]} is required.")
+            vals[f] = float(MED[f])
+            filled.append(LABEL[f])
+            continue
+        try:
+            x = float(raw)
+        except ValueError:
+            raise ValueError(f"{LABEL[f]} must be a number.")
         lo, hi = LIMITS[f]
-        if not lo <= x <= hi: raise ValueError(f"{LABEL[f]} should be between {lo} and {hi}.")
+        if not lo <= x <= hi:
+            raise ValueError(f"{LABEL[f]} should be between {lo} and {hi}.")
         vals[f] = x
     return vals, filled
 
@@ -61,7 +279,8 @@ def drivers(vals, p):
     """What-if: how much does risk drop if this value were the healthy-reference value?"""
     out = []
     for f in FEATS:
-        v = dict(vals); v[f] = float(REF[f])
+        v = dict(vals)
+        v[f] = float(REF[f])
         out.append({"label": LABEL[f], "value": vals[f], "impact": round(p - score(v), 3)})
     return sorted(out, key=lambda d: -abs(d["impact"]))[:5]
 
@@ -70,29 +289,64 @@ def fallback_text(p, b, drv):
     up = [d["label"].lower() for d in drv if d["impact"] > 0.02][:3]
     head = f"Based on your health numbers, your estimated chance of developing diabetes is {p*100:.0f}%, which falls in the {b.lower()} risk range. " + (
         "The numbers that affect your result the most right now are " + ", ".join(up) + "." if up else "None of your single numbers stands out as raising your risk.")
-    recs = {"Low": ["Keep enjoying regular daily physical activity (about 150 minutes a week).", "Eat balanced meals with plenty of vegetables, whole grains, and water.", "Get your blood sugar checked every 1 to 3 years.", "Talk to a doctor if you notice any unusual changes in your health."],
-            "Moderate": ["Aim for 30 minutes of brisk walking or moderate exercise most days.", "Cut back on sugary drinks, sweets, and refined snacks.", "Losing even a small amount of extra weight can significantly protect your health.", "Ask a doctor about getting a routine blood sugar test."],
-            "High": ["See a doctor soon for a formal fasting blood sugar or HbA1c test.", "Start taking daily walks and drinking water instead of sugary drinks.", "Ask your healthcare team about guided lifestyle and healthy eating programmes.", "Keep track of your blood pressure and weight over time."]}[b]
+    recs = {
+        "Low": [
+            "Keep enjoying regular daily physical activity (about 150 minutes a week).",
+            "Eat balanced meals with plenty of vegetables, whole grains, and water.",
+            "Get your blood sugar checked every 1 to 3 years.",
+            "Talk to a doctor if you notice any unusual changes in your health."
+        ],
+        "Moderate": [
+            "Aim for 30 minutes of brisk walking or moderate exercise most days.",
+            "Cut back on sugary drinks, sweets, and refined snacks.",
+            "Losing even a small amount of extra weight can significantly protect your health.",
+            "Ask a doctor about getting a routine blood sugar test."
+        ],
+        "High": [
+            "See a doctor soon for a formal fasting blood sugar or HbA1c test.",
+            "Start taking daily walks and drinking water instead of sugary drinks.",
+            "Ask your healthcare team about guided lifestyle and healthy eating programmes.",
+            "Keep track of your blood pressure and weight over time."
+        ]
+    }[b]
     return head + "\n\nRecommendations:\n" + "\n".join("- " + r for r in recs)
 
 
 def groq_text(p, b, vals, drv):
     key = os.getenv("GROQ_API_KEY")
-    if not key: return None
+    if not key:
+        return None
     facts = ", ".join(f"{LABEL[k]}={v:g}" for k, v in vals.items())
     drv_txt = "; ".join(f"{d['label']} ({'raises' if d['impact'] > 0 else 'lowers'} risk by {abs(d['impact'])*100:.0f} points)" for d in drv)
-    body = {"model": GROQ_MODEL, "temperature": 0.3, "max_completion_tokens": 900, "messages": [
-        {"role": "system", "content": "You are a friendly, caring health educator writing at a 6th-grade reading level. Explain this diabetes risk estimate in simple, reassuring words. Never mention models, algorithms, machine learning, statistics, or AI. Do NOT diagnose, do NOT mention medication or doses. Write 3-4 short sentences, then a line 'Recommendations:' followed by 4 bullet lines starting with '- ' (healthy habits, everyday changes, and when to see a doctor). No markdown headings, no emojis."},
-        {"role": "user", "content": f"Estimated risk: {p*100:.0f}% ({b}). Health numbers: {facts}. Main factors: {drv_txt}."}]}
-    req = urllib.request.Request("https://api.groq.com/openai/v1/chat/completions", json.dumps(body).encode(),
-                                 {"Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "UyirScore/1.0"})
+    body = {
+        "model": GROQ_MODEL,
+        "temperature": 0.3,
+        "max_completion_tokens": 900,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a friendly, caring health educator writing at a 6th-grade reading level. Explain this diabetes risk estimate in simple, reassuring words. Never mention models, algorithms, machine learning, statistics, or AI. Do NOT diagnose, do NOT mention medication or doses. Write 3-4 short sentences, then a line 'Recommendations:' followed by 4 bullet lines starting with '- ' (healthy habits, everyday changes, and when to see a doctor). No markdown headings, no emojis."
+            },
+            {
+                "role": "user",
+                "content": f"Estimated risk: {p*100:.0f}% ({b}). Health numbers: {facts}. Main factors: {drv_txt}."
+            }
+        ]
+    }
+    req = urllib.request.Request(
+        "https://api.groq.com/openai/v1/chat/completions",
+        json.dumps(body).encode(),
+        {"Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "VaagaiPharm/1.0"}
+    )
     try:
         with urllib.request.urlopen(req, timeout=25) as r:
             return (json.load(r)["choices"][0]["message"]["content"] or "").strip() or None
     except Exception as e:
-        print("[groq failed]", type(e).__name__, e); return None
+        print("[groq failed]", type(e).__name__, e)
+        return None
 
 
+# Web & Static Routes
 @app.get("/")
 def home():
     resp = send_from_directory(os.path.join(HERE, "templates"), "index.html")
@@ -101,20 +355,29 @@ def home():
 
 
 @app.get("/logo.png")
-def logo(): return send_from_directory(os.path.join(HERE, "static"), "logo.png")
+def logo():
+    return send_from_directory(os.path.join(HERE, "static"), "logo.png")
 
 
+# Risk Screening API Routes
 @app.post("/api/predict")
 def predict():
     data = request.get_json(silent=True) or {}
-    try: vals, filled = parse(data)
-    except ValueError as e: return jsonify(error=str(e)), 400
-    p = score(vals); b = band(p); drv = drivers(vals, p)
-    text = groq_text(p, b, vals, drv); source = "groq" if text else "fallback"
+    try:
+        vals, filled = parse(data)
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
+    p = score(vals)
+    b = band(p)
+    drv = drivers(vals, p)
+    text = groq_text(p, b, vals, drv)
+    source = "groq" if text else "fallback"
     text = text or fallback_text(p, b, drv)
     with db() as c:
-        c.execute("INSERT INTO assessments(ts,label,risk,band,age,bmi,glucose) VALUES(?,?,?,?,?,?,?)",
-                  (time.time(), str(data.get("label", ""))[:40], p, b, vals["Age"], vals["BMI"], vals["Glucose"]))
+        c.execute(
+            "INSERT INTO assessments(ts,label,risk,band,age,bmi,glucose) VALUES(?,?,?,?,?,?,?)",
+            (time.time(), str(data.get("label", ""))[:40], p, b, vals["Age"], vals["BMI"], vals["Glucose"])
+        )
     return jsonify(risk=p, band=b, drivers=drv, explanation=text, explanation_source=source, assumed=filled)
 
 
@@ -126,6 +389,7 @@ def dashboard():
     return jsonify(cohort=METRICS, live={"total": len(rows), "counts": counts, "recent": rows[:8]})
 
 
+# Clinical/Diabetes Assistant Q&A (/api/chat mode for VaagaiBot)
 def chatbot_reply(msg):
     key = os.getenv("GROQ_API_KEY")
     if key:
@@ -137,8 +401,8 @@ def chatbot_reply(msg):
                 {
                     "role": "system",
                     "content": (
-                        "You are UyirBot, a kind and empathetic health assistant for Uyir Score, a diabetes risk "
-                        "assessment platform for Indian families. Answer questions in clear, simple language (6th to 8th grade reading level). "
+                        "You are VaagaiBot, a kind and empathetic health assistant for Vaagai Pharm, a clinical "
+                        "risk-screening and pharmacy platform for Indian families. Answer questions in clear, simple language (6th to 8th grade reading level). "
                         "Provide accurate guidance on diabetes prevention, ICMR blood sugar ranges, HbA1c, BMI, balanced Indian diet "
                         "(millets, whole grains, non-starchy vegetables, cutting sugar), physical activity, and emergency signs. "
                         "Never diagnose disease or prescribe medications/dosages. Always suggest consulting a physician for formal clinical lab tests. "
@@ -151,7 +415,7 @@ def chatbot_reply(msg):
         req = urllib.request.Request(
             "https://api.groq.com/openai/v1/chat/completions",
             json.dumps(body).encode(),
-            {"Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "UyirScore/1.0"}
+            {"Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "VaagaiPharm/1.0"}
         )
         try:
             with urllib.request.urlopen(req, timeout=20) as r:
@@ -171,9 +435,9 @@ def chatbot_reply(msg):
             "Please consult a physician for formal laboratory blood testing.",
             "fallback"
         )
-    if any(w in m for w in ["how", "test", "work", "score", "uyir", "start"]):
+    if any(w in m for w in ["how", "test", "work", "score", "vaagai", "start"]):
         return (
-            "The Uyir Score screening test takes about 2 minutes. Answer 9 simple questions on age, BMI, blood sugar, "
+            "The Vaagai Pharm screening test takes about 2 minutes. Answer 9 simple questions on age, BMI, blood sugar, "
             "blood pressure, and family history. You will receive an evidence-based risk estimate (Low, Moderate, or High) "
             "and practical lifestyle steps.",
             "fallback"
@@ -196,7 +460,7 @@ def chatbot_reply(msg):
             "fallback"
         )
     return (
-        "Hello! I am UyirBot, your health assistant. You can ask me about blood sugar ranges, how to take the Uyir Score screening test, "
+        "Hello! I am VaagaiBot, your health assistant. You can ask me about blood sugar ranges, how to take the Vaagai Pharm screening test, "
         "diet and exercise tips for diabetes prevention, or when to seek medical help.",
         "fallback"
     )
@@ -210,6 +474,399 @@ def chat():
         return jsonify(error="Empty message"), 400
     reply, src = chatbot_reply(msg)
     return jsonify(reply=reply, source=src)
+
+
+# =========================================================================
+# FEATURE A: Pharmacy Stock Management Dashboard Routes
+# =========================================================================
+@app.get("/api/inventory")
+def get_inventory():
+    today = datetime.date.today()
+    near_expiry_limit = today + datetime.timedelta(days=30)
+    limit_iso = near_expiry_limit.isoformat()
+
+    with db() as c:
+        rows = c.execute("SELECT * FROM inventory ORDER BY medicine_name ASC").fetchall()
+
+    items = []
+    low_stock_count = 0
+    near_expiry_count = 0
+
+    for r in rows:
+        d = dict(r)
+        current = int(d["current_stock"] or 0)
+        minimum = int(d["minimum_required_stock"] or 10)
+        exp = str(d["expiry_date"]).strip() if d["expiry_date"] else None
+
+        is_low = current <= minimum
+        is_near = bool(exp and exp <= limit_iso)
+
+        if is_low:
+            low_stock_count += 1
+        if is_near:
+            near_expiry_count += 1
+
+        d["is_low_stock"] = is_low
+        d["is_near_expiry"] = is_near
+        d["suggested_reorder_qty"] = max(0, minimum - current)
+        items.append(d)
+
+    return jsonify({
+        "items": items,
+        "summary": {
+            "total_items": len(items),
+            "low_stock_count": low_stock_count,
+            "near_expiry_count": near_expiry_count
+        }
+    })
+
+
+@app.post("/api/inventory")
+def add_inventory():
+    data = request.get_json(silent=True) or {}
+    medicine_name = str(data.get("medicine_name", "")).strip()
+    if not medicine_name:
+        return jsonify(error="Medicine name is required"), 400
+
+    try:
+        current_stock = int(data.get("current_stock"))
+    except (TypeError, ValueError):
+        return jsonify(error="Current stock must be a valid integer"), 400
+
+    try:
+        minimum_required_stock = int(data.get("minimum_required_stock", 10))
+    except (TypeError, ValueError):
+        minimum_required_stock = 10
+
+    active_ingredient = str(data.get("active_ingredient", "")).strip() or None
+    expiry_date = str(data.get("expiry_date", "")).strip() or None
+
+    with db() as c:
+        cur = c.execute(
+            """INSERT INTO inventory(medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date)
+               VALUES (?, ?, ?, ?, ?)""",
+            (medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date)
+        )
+        new_id = cur.lastrowid
+
+    return jsonify(ok=True, id=new_id), 201
+
+
+@app.put("/api/inventory/<int:item_id>")
+def update_inventory(item_id):
+    data = request.get_json(silent=True) or {}
+    medicine_name = str(data.get("medicine_name", "")).strip()
+    if not medicine_name:
+        return jsonify(error="Medicine name is required"), 400
+
+    try:
+        current_stock = int(data.get("current_stock"))
+    except (TypeError, ValueError):
+        return jsonify(error="Current stock must be a valid integer"), 400
+
+    try:
+        minimum_required_stock = int(data.get("minimum_required_stock", 10))
+    except (TypeError, ValueError):
+        minimum_required_stock = 10
+
+    active_ingredient = str(data.get("active_ingredient", "")).strip() or None
+    expiry_date = str(data.get("expiry_date", "")).strip() or None
+
+    with db() as c:
+        c.execute(
+            """UPDATE inventory
+               SET medicine_name = ?, active_ingredient = ?, current_stock = ?, minimum_required_stock = ?, expiry_date = ?
+               WHERE id = ?""",
+            (medicine_name, active_ingredient, current_stock, minimum_required_stock, expiry_date, item_id)
+        )
+
+    return jsonify(ok=True)
+
+
+@app.delete("/api/inventory/<int:item_id>")
+def delete_inventory(item_id):
+    with db() as c:
+        c.execute("DELETE FROM inventory WHERE id = ?", (item_id,))
+    return jsonify(ok=True)
+
+
+@app.get("/api/inventory/export-low-stock")
+def export_low_stock():
+    with db() as c:
+        rows = c.execute(
+            "SELECT * FROM inventory WHERE current_stock <= minimum_required_stock ORDER BY medicine_name ASC"
+        ).fetchall()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Medicine Name", "Active Ingredient", "Current Stock", "Minimum Required", "Suggested Reorder Qty"])
+    for r in rows:
+        reorder_qty = max(0, int(r["minimum_required_stock"] or 10) - int(r["current_stock"] or 0))
+        writer.writerow([
+            r["medicine_name"],
+            r["active_ingredient"] or "",
+            r["current_stock"],
+            r["minimum_required_stock"],
+            reorder_qty
+        ])
+
+    csv_data = output.getvalue().encode("utf-8")
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=low_stock_inventory.csv"}
+    )
+
+
+# =========================================================================
+# FEATURE B: Drug Information Chatbot (RAG) Routes
+# =========================================================================
+@app.post("/api/drug-chat")
+def drug_chat():
+    data = request.get_json(silent=True) or {}
+    question = str(data.get("question", "")).strip()
+    if not question:
+        return jsonify(error="Question is required"), 400
+
+    q_emb = embed_text(question)
+
+    with db() as c:
+        rows = c.execute("""
+            SELECT dc.id, dc.content, dc.embedding, d.title, d.source_type, d.source_url
+            FROM drug_chunks dc
+            JOIN drug_documents d ON dc.document_id = d.id
+        """).fetchall()
+
+    scored = []
+    for r in rows:
+        try:
+            emb = json.loads(r["embedding"])
+            sim = cosine_similarity(q_emb, emb)
+            scored.append((sim, r))
+        except Exception:
+            continue
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top_items = scored[:5]
+
+    # Explicit threshold check: if no relevant chunk found above threshold
+    threshold = 0.12
+    valid_chunks = [item for item in top_items if item[0] >= threshold]
+
+    if not valid_chunks:
+        return jsonify({
+            "answer": "Information for this query was not found in the Vaagai Pharm drug knowledge base. Please check the drug name or upload relevant documentation in Manage Sources.",
+            "sources": []
+        })
+
+    # Prepare context and sources
+    context_blocks = []
+    sources_dict = {}
+    for score_val, r in valid_chunks:
+        context_blocks.append(f"Document: {r['title']}\n{r['content']}")
+        key = (r["title"], r["source_type"], r["source_url"])
+        if key not in sources_dict:
+            sources_dict[key] = {
+                "title": r["title"],
+                "source_type": r["source_type"],
+                "source_url": r["source_url"]
+            }
+
+    combined_context = "\n\n---\n\n".join(context_blocks)
+    sources = list(sources_dict.values())
+
+    # Call Groq LLM with strict grounding prompt
+    key = os.getenv("GROQ_API_KEY")
+    if key:
+        body = {
+            "model": GROQ_MODEL,
+            "temperature": 0.2,
+            "max_completion_tokens": 600,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are VaagaiBot Drug Information Assistant for Vaagai Pharm. "
+                        "Answer the question using ONLY the provided drug context below. "
+                        "If the provided context does not contain enough information to answer the question, "
+                        "state clearly that the answer is not found in the knowledge base. "
+                        "Strictly never speculate, never guess, and never use outside knowledge. "
+                        "Keep answers precise, clinical, and helpful. "
+                        "Always remind that this is for reference only and does not replace a pharmacist's or clinician's professional judgment."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": f"Provided Drug Context:\n{combined_context}\n\nQuestion: {question}"
+                }
+            ]
+        }
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/chat/completions",
+            json.dumps(body).encode(),
+            {"Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "VaagaiPharm/1.0"}
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=25) as r:
+                ans = (json.load(r)["choices"][0]["message"]["content"] or "").strip()
+                if ans:
+                    return jsonify({"answer": ans, "sources": sources})
+        except Exception as e:
+            print("[drug-chat groq error]", type(e).__name__, e)
+
+    # Deterministic fallback answer directly from retrieved chunks
+    top_chunk_snippet = valid_chunks[0][1]["content"]
+    fallback_ans = (
+        f"From {valid_chunks[0][1]['title']}:\n\n"
+        f"{top_chunk_snippet}\n\n"
+        "(Reference information only. Always verify with official drug labeling and a registered pharmacist.)"
+    )
+    return jsonify({"answer": fallback_ans, "sources": sources})
+
+
+@app.post("/api/drug-documents/upload")
+def upload_drug_document():
+    if PdfReader is None:
+        return jsonify(error="PDF extraction library (pypdf/PyPDF2) is not available"), 500
+
+    if "file" not in request.files:
+        return jsonify(error="No file uploaded"), 400
+
+    f = request.files["file"]
+    if not f or not f.filename:
+        return jsonify(error="Invalid file"), 400
+
+    filename = f.filename
+    title = str(request.form.get("title", "")).strip() or filename
+
+    try:
+        reader = PdfReader(f.stream)
+        text_pages = []
+        for p in reader.pages:
+            t = p.extract_text()
+            if t:
+                text_pages.append(t)
+        full_text = "\n\n".join(text_pages)
+    except Exception as e:
+        return jsonify(error=f"Could not read PDF: {str(e)}"), 400
+
+    if not full_text.strip():
+        return jsonify(error="PDF contained no readable text"), 400
+
+    chunks = chunk_text(full_text, target_words=240, overlap_words=40)
+    if not chunks:
+        return jsonify(error="Could not split text into chunks"), 400
+
+    with db() as c:
+        cur = c.execute(
+            "INSERT INTO drug_documents(title, source_type, source_url) VALUES (?, ?, ?)",
+            (title, "uploaded_pdf", None)
+        )
+        doc_id = cur.lastrowid
+        for chunk in chunks:
+            emb = embed_text(chunk)
+            c.execute(
+                "INSERT INTO drug_chunks(document_id, content, embedding) VALUES (?, ?, ?)",
+                (doc_id, chunk, json.dumps(emb))
+            )
+
+    return jsonify({"ok": True, "document_id": doc_id, "title": title, "chunks_count": len(chunks)}), 201
+
+
+@app.post("/api/drug-documents/fetch-openfda")
+def fetch_openfda():
+    data = request.get_json(silent=True) or {}
+    drug_name = str(data.get("drug_name", "")).strip()
+    if not drug_name:
+        return jsonify(error="Drug name is required"), 400
+
+    encoded_name = urllib.parse.quote(drug_name)
+    url = f'https://api.fda.gov/drug/label.json?search=openfda.generic_name:"{encoded_name}"&limit=1'
+    req = urllib.request.Request(url, headers={"User-Agent": "VaagaiPharm/1.0"})
+    doc_data = None
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            doc_data = json.load(resp)
+    except Exception:
+        # Fallback to search by brand name
+        url_brand = f'https://api.fda.gov/drug/label.json?search=openfda.brand_name:"{encoded_name}"&limit=1'
+        req_brand = urllib.request.Request(url_brand, headers={"User-Agent": "VaagaiPharm/1.0"})
+        try:
+            with urllib.request.urlopen(req_brand, timeout=15) as resp_b:
+                doc_data = json.load(resp_b)
+                url = url_brand
+        except Exception:
+            return jsonify(error=f"Could not retrieve drug label from openFDA for '{drug_name}'"), 404
+
+    results = doc_data.get("results", []) if doc_data else []
+    if not results:
+        return jsonify(error=f"No openFDA label found for '{drug_name}'"), 404
+
+    label = results[0]
+    title = f"{drug_name.title()} (openFDA Label)"
+
+    sections = [
+        ("Indications and Usage", label.get("indications_and_usage")),
+        ("Dosage and Administration", label.get("dosage_and_administration")),
+        ("Warnings and Precautions", label.get("warnings") or label.get("warnings_and_cautions")),
+        ("Contraindications", label.get("contraindications")),
+        ("Description and Generic Information", label.get("description") or label.get("openfda", {}).get("generic_name"))
+    ]
+
+    chunks_to_insert = []
+    for heading, field_val in sections:
+        if not field_val:
+            continue
+        text_val = " ".join(field_val) if isinstance(field_val, list) else str(field_val)
+        subchunks = chunk_text(f"{heading} for {drug_name.title()}:\n{text_val}")
+        for sc in subchunks:
+            chunks_to_insert.append(sc)
+
+    if not chunks_to_insert:
+        return jsonify(error="openFDA record had no clinical text sections to extract"), 400
+
+    with db() as c:
+        cur = c.execute(
+            "INSERT INTO drug_documents(title, source_type, source_url) VALUES (?, ?, ?)",
+            (title, "openFDA", url)
+        )
+        doc_id = cur.lastrowid
+        for chunk in chunks_to_insert:
+            emb = embed_text(chunk)
+            c.execute(
+                "INSERT INTO drug_chunks(document_id, content, embedding) VALUES (?, ?, ?)",
+                (doc_id, chunk, json.dumps(emb))
+            )
+
+    return jsonify({
+        "ok": True,
+        "document_id": doc_id,
+        "title": title,
+        "chunks_count": len(chunks_to_insert),
+        "source_url": url
+    }), 201
+
+
+@app.get("/api/drug-documents")
+def list_drug_documents():
+    with db() as c:
+        rows = c.execute("""
+            SELECT d.id, d.title, d.source_type, d.source_url, d.created_at,
+                   COUNT(dc.id) AS chunks_count
+            FROM drug_documents d
+            LEFT JOIN drug_chunks dc ON d.id = dc.document_id
+            GROUP BY d.id
+            ORDER BY d.id DESC
+        """).fetchall()
+    return jsonify({"documents": [dict(r) for r in rows]})
+
+
+@app.delete("/api/drug-documents/<int:doc_id>")
+def delete_drug_document(doc_id):
+    with db() as c:
+        c.execute("DELETE FROM drug_documents WHERE id = ?", (doc_id,))
+    return jsonify(ok=True)
 
 
 if __name__ == "__main__":

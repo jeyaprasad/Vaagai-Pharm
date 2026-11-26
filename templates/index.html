@@ -3,36 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Uyir Score - Diabetes Risk Screening</title>
+  <title>Vaagai Pharm - Pharmacy &amp; Clinical Intelligence Platform</title>
   <style>
 /* CSS Reset and Variables */
 :root {
-  --primary: #0a72c4;
-  --primary-hover: #085ea3;
-  --primary-light: #e0f0fc;
-  --logo-red: #e0262b;
-  --logo-red-light: #fee2e2;
-  --bg-page: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-subtle: #f1f5f9;
+  --primary: #0e626e;             /* Deep Botanical Teal */
+  --primary-hover: #094a53;       /* Richer Dark Teal */
+  --primary-light: #e6f3f4;       /* Soft Botanical Teal Tint */
+  --accent-terracotta: #b84d23;   /* Rich Terracotta / Rust */
+  --accent-terracotta-light: #fbeee8;
+  --bg-page: #fbf9f4;             /* Warm Ivory / Linen Page Background */
+  --bg-card: #ffffff;             /* Pure White Card */
+  --bg-subtle: #f3efe6;           /* Subtle Warm Cream Tint */
   --bg-input: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #64748b;
-  --border: #cbd5e1;
-  --border-focus: #0a72c4;
-  --band-low: #15803d;
-  --band-low-bg: #dcfce7;
-  --band-low-text: #14532d;
-  --band-mod: #b45309;
-  --band-mod-bg: #fef3c7;
-  --band-mod-text: #78350f;
-  --band-high: #b91c1c;
-  --band-high-bg: #fee2e2;
-  --band-high-text: #7f1d1d;
-  --shadow-sm: 0 1px 3px rgba(10, 114, 196, 0.05), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(10, 114, 196, 0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg: 0 10px 25px rgba(10, 114, 196, 0.12), 0 4px 10px rgba(0,0,0,0.06);
+  --text-main: #18222b;           /* Deep Charcoal Text */
+  --text-muted: #4a5966;          /* Muted Slate Text */
+  --text-dim: #718291;            /* Dim Hint Text */
+  --border: #dcd6cb;              /* Warm Neutral Border */
+  --border-focus: #0e626e;
+  --band-low: #2d5a36;            /* Botanical Leaf Green */
+  --band-low-bg: #eaf3ec;
+  --band-low-text: #1d4024;
+  --band-mod: #b86214;            /* Amber Gold */
+  --band-mod-bg: #fdf3e7;
+  --band-mod-text: #7c3f07;
+  --band-high: #b83227;           /* Crimson / Red */
+  --band-high-bg: #fdeceb;
+  --band-high-text: #791e17;
+  --shadow-sm: 0 1px 3px rgba(14, 98, 110, 0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 14px rgba(14, 98, 110, 0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 28px rgba(14, 98, 110, 0.12), 0 4px 10px rgba(0,0,0,0.05);
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -44,35 +44,6 @@
   --space-5: 24px;
   --space-6: 32px;
   --space-8: 48px;
-}
-
-[data-theme="dark"] {
-  --primary: #38bdf8;
-  --primary-hover: #7dd3fc;
-  --primary-light: rgba(56, 189, 248, 0.15);
-  --logo-red: #f87171;
-  --logo-red-light: rgba(248, 113, 113, 0.15);
-  --bg-page: #0b1324;
-  --bg-card: #131f37;
-  --bg-subtle: #1a2948;
-  --bg-input: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #cbd5e1;
-  --text-dim: #94a3b8;
-  --border: #334155;
-  --border-focus: #38bdf8;
-  --band-low: #4ade80;
-  --band-low-bg: rgba(74, 222, 128, 0.15);
-  --band-low-text: #86efac;
-  --band-mod: #fbbf24;
-  --band-mod-bg: rgba(251, 191, 36, 0.15);
-  --band-mod-text: #fde68a;
-  --band-high: #f87171;
-  --band-high-bg: rgba(248, 113, 113, 0.15);
-  --band-high-text: #fca5a5;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
 }
 
 *, *::before, *::after {
@@ -138,11 +109,14 @@ body {
   line-height: 1;
 }
 .brand-logo {
-  height: 38px;
-  width: auto;
-  border-radius: var(--radius-sm);
+  height: 42px;
+  width: 42px;
+  border-radius: 50%;
   display: block;
   flex-shrink: 0;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  border: 1.5px solid var(--border);
 }
 .brand-name {
   font-size: 21px;
@@ -1509,11 +1483,7 @@ main {
   font-size: 13.5px;
   line-height: 1.5;
 }
-[data-theme="dark"] .report-sheet-doc {
-  background: #0f172a;
-  color: #f8fafc;
-  border-color: #334155;
-}
+
 
 /* Print Stylesheet */
 @media print {
@@ -1553,6 +1523,44 @@ main {
 }
   
 /* ========================================================= */
+
+/* Floating Chatbot Dual Mode Switcher */
+.chatbot-mode-bar {
+  display: flex;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  padding: 5px;
+  gap: 5px;
+}
+.chatbot-mode-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chatbot-mode-tab:hover {
+  color: var(--text-main);
+  background: rgba(0,0,0,0.04);
+}
+.chatbot-mode-tab.active {
+  background: var(--bg-card);
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.chatbot-container {
+  z-index: 9999 !important;
+}
+
 /* FLOATING CHATBOT WIDGET                                   */
 /* ========================================================= */
 .chatbot-container {
@@ -1576,7 +1584,7 @@ main {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-terracotta) 100%);
   color: #ffffff;
   border: none;
   box-shadow: 0 4px 18px rgba(10, 114, 196, 0.38), 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -1679,7 +1687,7 @@ main {
 /* Header */
 .chatbot-header {
   padding: 12px 14px;
-  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-terracotta) 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1797,7 +1805,7 @@ main {
 
 .chat-bubble-user {
   align-self: flex-end;
-  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-terracotta) 100%);
   color: #ffffff;
   border-top-right-radius: 3px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -1955,6 +1963,320 @@ main {
   }
 }
 
+  
+/* ========================================================= */
+/* PHARMACY DASHBOARD & DRUG CHAT STYLES                     */
+/* ========================================================= */
+.stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.stat-card-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-card-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.stat-card-badge.stat-alert-red {
+  border-left: 5px solid var(--band-high);
+  background: linear-gradient(to right, var(--band-high-bg), var(--bg-card) 60%);
+}
+.stat-card-badge.stat-alert-amber {
+  border-left: 5px solid var(--band-mod);
+  background: linear-gradient(to right, var(--band-mod-bg), var(--bg-card) 60%);
+}
+.stat-card-badge.stat-alert-blue {
+  border-left: 5px solid var(--primary);
+  background: linear-gradient(to right, var(--primary-light), var(--bg-card) 60%);
+}
+.stat-number {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+.stat-number.text-red { color: var(--band-high); }
+.stat-number.text-amber { color: var(--band-mod); }
+.stat-number.text-primary { color: var(--primary); }
+.stat-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.inventory-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.inventory-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  max-width: 440px;
+}
+.inventory-search-wrap input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 14px;
+}
+.inventory-search-wrap input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+.inventory-search-wrap svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+}
+.data-table th {
+  background: var(--bg-subtle);
+  padding: 12px 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.data-table th:hover {
+  color: var(--primary);
+}
+.data-table th.no-sort {
+  cursor: default;
+}
+.data-table th.no-sort:hover {
+  color: var(--text-main);
+}
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+.data-table tr:hover td {
+  background-color: var(--bg-subtle);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.badge-low-stock {
+  background-color: var(--band-high-bg);
+  color: var(--band-high-text);
+  border: 1px solid rgba(185, 28, 28, 0.3);
+}
+.badge-near-expiry {
+  background-color: var(--band-mod-bg);
+  color: var(--band-mod-text);
+  border: 1px solid rgba(180, 83, 9, 0.3);
+}
+.badge-ok {
+  background-color: var(--band-low-bg);
+  color: var(--band-low-text);
+  border: 1px solid rgba(21, 128, 61, 0.3);
+}
+
+/* Modal Form Styles */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--text-main);
+}
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 13.5px;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Drug Chat Section Styles */
+.disclaimer-banner {
+  background: var(--band-mod-bg);
+  border: 1px solid var(--band-mod);
+  color: var(--band-mod-text);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-4);
+}
+.drug-chat-container {
+  display: flex;
+  flex-direction: column;
+  height: clamp(520px, calc(100vh - 250px), 800px);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 84px;
+}
+.drug-chat-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.drug-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--bg-page);
+}
+.drug-msg-bubble {
+  max-width: min(840px, 86%);
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.drug-msg-bubble p {
+  margin: 0 0 8px 0;
+}
+.drug-msg-bubble p:last-child {
+  margin-bottom: 0;
+}
+.drug-msg-user {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #ffffff;
+  border-bottom-right-radius: 3px;
+}
+.drug-msg-bot {
+  align-self: flex-start;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 3px;
+  box-shadow: var(--shadow-sm);
+}
+.drug-chat-input-bar {
+  padding: 12px 76px 12px 16px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.drug-chat-input-bar input {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 14px;
+}
+.drug-chat-input-bar input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+.sources-bar {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 11.5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  border: 1px solid rgba(10, 114, 196, 0.2);
+}
+.source-tag:hover {
+  text-decoration: underline;
+}
+.source-tag-pdf {
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
   </style>
 </head>
 <body>
@@ -1962,25 +2284,24 @@ main {
   <!-- Top Sticky Header -->
   <header class="site-header">
     <div class="header-container">
-      <a href="#home" class="brand-link" aria-label="Uyir Score Home">
-        <img src="/logo.png" alt="Uyir Score Logo" class="brand-logo" height="34">
-        <span class="brand-name">Uyir Score</span>
+      <a href="#dashboard" class="brand-link" aria-label="Vaagai Pharm Home">
+        <img src="/logo.png" alt="Vaagai Pharm Logo" class="brand-logo" height="42" width="42">
+        <div>
+          <span class="brand-name" style="color:var(--primary);font-weight:800;letter-spacing:-0.3px">Vaagai Pharm</span>
+          <div style="font-size:10.5px;color:var(--accent-terracotta);font-weight:700;letter-spacing:0.3px">Pharmacy &amp; Clinical Platform</div>
+        </div>
       </a>
 
-      <!-- Desktop Nav -->
+      <!-- Desktop Nav (4 primary tabs) -->
       <nav class="nav-desktop" aria-label="Main Navigation">
-        <a href="#test" class="nav-link" id="nav-test">Check my risk</a>
-        <a href="#guide" class="nav-link" id="nav-guide">Health guide</a>
-        <a href="#help" class="nav-link" id="nav-help">When to get help</a>
-        <a href="#clinics" class="nav-link" id="nav-clinics">For clinics</a>
-        <a href="#about" class="nav-link" id="nav-about">About</a>
+        <a href="#dashboard" class="nav-link" id="nav-dashboard">Dashboard</a>
+        <a href="#test" class="nav-link" id="nav-test">Risk Screening</a>
+        <a href="#clinics" class="nav-link" id="nav-clinics">Clinic Analytics</a>
+        <a href="#drug-chat" class="nav-link" id="nav-drug-chat">Drug Info Chat</a>
       </nav>
 
       <!-- Right Header Actions -->
       <div class="header-actions">
-        <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="toggleTheme()">
-          <!-- SVG icon filled dynamically -->
-        </button>
         <button id="mobile-menu-btn" class="btn-icon mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false" onclick="toggleMobileMenu()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
@@ -1989,11 +2310,10 @@ main {
 
     <!-- Mobile Drawer Menu -->
     <div id="mobile-menu" class="mobile-drawer" aria-label="Mobile Navigation">
-      <a href="#test" class="mobile-nav-link" onclick="closeMobileMenu()">Check my risk</a>
-      <a href="#guide" class="mobile-nav-link" onclick="closeMobileMenu()">Health guide</a>
-      <a href="#help" class="mobile-nav-link" onclick="closeMobileMenu()">When to get help</a>
-      <a href="#clinics" class="mobile-nav-link" onclick="closeMobileMenu()">For clinics</a>
-      <a href="#about" class="mobile-nav-link" onclick="closeMobileMenu()">About</a>
+      <a href="#dashboard" class="mobile-nav-link" onclick="closeMobileMenu()">Dashboard</a>
+      <a href="#test" class="mobile-nav-link" onclick="closeMobileMenu()">Risk Screening</a>
+      <a href="#clinics" class="mobile-nav-link" onclick="closeMobileMenu()">Clinic Analytics</a>
+      <a href="#drug-chat" class="mobile-nav-link" onclick="closeMobileMenu()">Drug Info Chat</a>
     </div>
   </header>
 
@@ -2007,7 +2327,169 @@ main {
       <!-- ============================================== -->
       <!-- 1. HOME VIEW (#home)                           -->
       <!-- ============================================== -->
-      <section id="page-home" class="section-panel active">
+            <!-- ============================================== -->
+      <!-- 0. PHARMACY DASHBOARD VIEW (#dashboard) - DEFAULT-->
+      <!-- ============================================== -->
+      <section id="page-dashboard" class="section-panel active">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-4);flex-wrap:wrap;gap:var(--space-2)">
+          <div>
+            <h1 class="page-title" style="margin-bottom:4px">Pharmacy Stock Management</h1>
+            <p class="page-desc" style="margin-bottom:0">Live dispensary inventory, stock thresholds, and near-expiry monitoring.</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button type="button" class="btn-secondary" onclick="exportLowStockCsv()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Low-Stock CSV</span>
+            </button>
+            <button type="button" class="btn-primary" onclick="openAddMedicineModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Add Medicine</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Banner Stat Cards -->
+        <div class="stats-summary-grid">
+          <div class="stat-card-badge stat-alert-red">
+            <div>
+              <div class="stat-label">Low Stock Items</div>
+              <div id="stat-low-stock-count" class="stat-number text-red">0</div>
+              <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px">Stock &le; minimum required</div>
+            </div>
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--band-high-bg);color:var(--band-high);display:grid;place-items:center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card-badge stat-alert-amber">
+            <div>
+              <div class="stat-label">Near Expiry Items</div>
+              <div id="stat-near-expiry-count" class="stat-number text-amber">0</div>
+              <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px">Expiring within 30 days</div>
+            </div>
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--band-mod-bg);color:var(--band-mod);display:grid;place-items:center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card-badge stat-alert-blue">
+            <div>
+              <div class="stat-label">Total Inventory SKUs</div>
+              <div id="stat-total-items-count" class="stat-number text-primary">0</div>
+              <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px">Active catalog products</div>
+            </div>
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--primary-light);color:var(--primary);display:grid;place-items:center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar & Filter -->
+        <div class="inventory-toolbar">
+          <div class="inventory-search-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="inventory-search-input" placeholder="Search medicines by name or active ingredient..." oninput="handleInventorySearch()">
+          </div>
+          <div style="font-size:12.5px;color:var(--text-dim)">
+            Click any column header to sort. Status badges update automatically.
+          </div>
+        </div>
+
+        <!-- Sortable Inventory Table -->
+        <div class="table-responsive">
+          <table class="data-table" id="inventory-table">
+            <thead>
+              <tr>
+                <th onclick="sortInventory('medicine_name')">Medicine Name <span id="sort-icon-medicine_name">&uarr;&darr;</span></th>
+                <th onclick="sortInventory('active_ingredient')">Active Ingredient <span id="sort-icon-active_ingredient">&uarr;&darr;</span></th>
+                <th onclick="sortInventory('current_stock')" style="text-align:right">Current Stock <span id="sort-icon-current_stock">&uarr;&darr;</span></th>
+                <th onclick="sortInventory('minimum_required_stock')" style="text-align:right">Min Required <span id="sort-icon-minimum_required_stock">&uarr;&darr;</span></th>
+                <th onclick="sortInventory('expiry_date')">Expiry Date <span id="sort-icon-expiry_date">&uarr;&darr;</span></th>
+                <th class="no-sort">Status</th>
+                <th class="no-sort" style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body">
+              <tr>
+                <td colspan="7" style="text-align:center;padding:30px;color:var(--text-dim)">Loading inventory data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- DRUG INFORMATION CHATBOT VIEW (#drug-chat)     -->
+      <!-- ============================================== -->
+      <section id="page-drug-chat" class="section-panel">
+        <!-- Persistent Disclaimer Banner -->
+        <div class="disclaimer-banner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Clinical reference only.</strong> Always cross-check with official prescribing information and clinical judgment.
+          </div>
+        </div>
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-4);flex-wrap:wrap;gap:var(--space-2)">
+          <div>
+            <h1 class="page-title" style="margin-bottom:4px">Drug Information Chatbot (RAG)</h1>
+            <p class="page-desc" style="margin-bottom:0">Grounded drug lookups from official openFDA product monographs and uploaded clinical PDFs.</p>
+          </div>
+          <button type="button" class="btn-secondary" onclick="openManageSourcesModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>Manage Sources &amp; Ingest</span>
+          </button>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="drug-chat-container">
+          <div class="drug-chat-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <img src="/logo.png" alt="Vaagai" style="width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
+              <div>
+                <div style="font-weight:700;font-size:14px">VaagaiBot Drug Reference</div>
+                <div style="font-size:11.5px;color:var(--text-dim)">Strict context retrieval &bull; Zero external hallucination</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-dim)" id="drug-chat-status">Ready</div>
+          </div>
+
+          <!-- Suggested Chips Row -->
+          <div class="chatbot-chips-bar" style="background:var(--bg-subtle);border-bottom:1px solid var(--border);padding:8px 16px">
+            <button type="button" class="chatbot-chip-btn" onclick="sendDrugChip('What are the indications and dosage for Metformin?')">Metformin indications &amp; dosage</button>
+            <button type="button" class="chatbot-chip-btn" onclick="sendDrugChip('What are the warnings and contraindications for Amoxicillin?')">Amoxicillin warnings</button>
+            <button type="button" class="chatbot-chip-btn" onclick="sendDrugChip('What adverse reactions are linked with Atorvastatin?')">Atorvastatin adverse reactions</button>
+          </div>
+
+          <!-- Messages Scroll Area -->
+          <div class="drug-chat-messages" id="drug-chat-messages">
+            <div class="drug-msg-bubble drug-msg-bot">
+              <p>Hello! I am <strong>VaagaiBot Drug Reference Assistant</strong>.</p>
+              <p>I answer questions about medications, clinical indications, dosages, contraindications, and adverse reactions grounded strictly in your ingested knowledge base (official FDA drug labels and uploaded monographs).</p>
+              <p style="font-size:12.5px;color:var(--text-dim)"><em>If a drug or topic is not in the knowledge base, I will explicitly inform you rather than guessing.</em></p>
+            </div>
+          </div>
+
+          <!-- Typing Indicator -->
+          <div id="drug-chat-typing" class="chat-typing" style="display:none;padding:8px 20px;background:var(--bg-page)">
+            <span class="chat-typing-dot"></span>
+            <span class="chat-typing-dot"></span>
+            <span class="chat-typing-dot"></span>
+          </div>
+
+          <!-- Input Footer -->
+          <form class="drug-chat-input-bar" onsubmit="handleDrugChatSubmit(event)">
+            <input type="text" id="drug-chat-input" placeholder="Ask about drug indications, dosage, warnings, or adverse reactions..." autocomplete="off">
+            <button type="submit" id="drug-chat-send-btn" class="btn-primary" style="padding:10px 20px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <span>Send</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section id="page-home" class="section-panel">
         <!-- Hero Banner -->
         <div class="hero-card">
           <span class="hero-tag">Simple health check</span>
@@ -2411,17 +2893,17 @@ main {
       <!-- 6. ABOUT VIEW (#about)                         -->
       <!-- ============================================== -->
       <section id="page-about" class="section-panel">
-        <h1 class="page-title">About Uyir Score</h1>
+        <h1 class="page-title">About Vaagai Pharm</h1>
         <p class="page-desc">Making diabetes screening approachable, transparent, and private for Indian families.</p>
 
         <!-- Our Story -->
         <div class="card card-hover" style="margin-bottom:var(--space-5)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
-            <h2 style="font-size:18px;font-weight:800;margin:0">Why Uyir Score exists</h2>
+            <h2 style="font-size:18px;font-weight:800;margin:0">Why Vaagai Pharm exists</h2>
             <span class="tag">Our story</span>
           </div>
           <p style="font-size:14px;line-height:1.6;color:var(--text-main)">
-            <strong>Uyir means life in Tamil.</strong> Across India, millions of people live with early elevated blood sugar or prediabetes without knowing it. Uyir Score was designed to provide an easy, question-by-question check that translates complex measurements into plain-language advice before health problems develop.
+            <strong>Vaagai (meaning victory tree / banyan in Tamil) symbolizes strength and longevity.</strong> Across India, millions of people live with early elevated blood sugar or prediabetes without knowing it. Vaagai Pharm was designed to provide an easy, question-by-question check that translates complex measurements into plain-language advice before health problems develop.
           </p>
         </div>
 
@@ -2485,7 +2967,7 @@ main {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="faq-content">
-              No. Uyir Score is a screening and educational tool designed to help you understand risk factors. Only a qualified doctor using certified laboratory blood tests (such as fasting blood glucose or HbA1c) can diagnose diabetes.
+              No. Vaagai Pharm is a screening and educational tool designed to help you understand risk factors. Only a qualified doctor using certified laboratory blood tests (such as fasting blood glucose or HbA1c) can diagnose diabetes.
             </div>
           </div>
 
@@ -2524,6 +3006,113 @@ main {
     </div>
   </main>
 
+
+  <!-- Inventory Add/Edit Modal -->
+  <div id="inventory-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeInventoryModal()">
+    <div class="modal-card report-card-modal" style="max-width:540px">
+      <div class="report-modal-header">
+        <h3 id="inventory-modal-title" style="font-size:16px;font-weight:800;margin:0">Add New Medicine</h3>
+        <button type="button" class="btn-icon" aria-label="Close modal" onclick="closeInventoryModal()" style="width:32px;height:32px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="inventory-form" onsubmit="handleSaveInventory(event)" style="padding:20px">
+        <input type="hidden" id="inv-id" value="">
+        <div class="form-group">
+          <label for="inv-medicine-name">Medicine Name *</label>
+          <input type="text" id="inv-medicine-name" placeholder="e.g. Metformin 500mg Tablets" required>
+        </div>
+        <div class="form-group">
+          <label for="inv-active-ingredient">Active Ingredient</label>
+          <input type="text" id="inv-active-ingredient" placeholder="e.g. Metformin Hydrochloride">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inv-current-stock">Current Stock *</label>
+            <input type="number" id="inv-current-stock" min="0" placeholder="0" required>
+          </div>
+          <div class="form-group">
+            <label for="inv-minimum-stock">Minimum Required Stock *</label>
+            <input type="number" id="inv-minimum-stock" min="0" placeholder="10" required value="10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inv-expiry-date">Expiry Date</label>
+          <input type="date" id="inv-expiry-date">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+          <button type="button" class="btn-secondary" onclick="closeInventoryModal()">Cancel</button>
+          <button type="submit" id="btn-save-inv" class="btn-primary">Save Medicine</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage Drug Sources Modal -->
+  <div id="manage-sources-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeManageSourcesModal()">
+    <div class="modal-card report-card-modal" style="max-width:760px">
+      <div class="report-modal-header">
+        <div>
+          <h3 style="font-size:16px;font-weight:800;margin:0 0 2px">Knowledge Base Documents (RAG)</h3>
+          <div style="font-size:12px;color:var(--text-dim)">Ingested drug monographs and clinical PDFs available for VaagaiBot</div>
+        </div>
+        <button type="button" class="btn-icon" aria-label="Close modal" onclick="closeManageSourcesModal()" style="width:32px;height:32px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div style="padding:20px;overflow-y:auto;max-height:calc(85vh - 70px)">
+        <!-- Section 1: Ingest from openFDA -->
+        <div class="card" style="margin-bottom:var(--space-4);background:var(--bg-subtle)">
+          <h4 style="font-size:14px;font-weight:700;margin:0 0 6px">1. Fetch &amp; Ingest from openFDA</h4>
+          <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px">Fetch official US FDA prescribing information by generic or brand drug name (e.g., Lisinopril, Omeprazole, Ciprofloxacin, Paracetamol).</p>
+          <div style="display:flex;gap:10px">
+            <input type="text" id="openfda-input" placeholder="Type drug generic or brand name..." style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);font-size:13.5px">
+            <button type="button" id="btn-fetch-openfda" class="btn-primary" onclick="fetchOpenFdaDrug()" style="padding:8px 16px;font-size:13px">
+              <span>Fetch Label</span>
+            </button>
+          </div>
+          <div id="openfda-status" style="font-size:12px;margin-top:6px;color:var(--text-dim)"></div>
+        </div>
+
+        <!-- Section 2: Upload PDF Monograph -->
+        <div class="card" style="margin-bottom:var(--space-4);background:var(--bg-subtle)">
+          <h4 style="font-size:14px;font-weight:700;margin:0 0 6px">2. Upload Clinical PDF Document</h4>
+          <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px">Extract text, generate embeddings, and chunk clinical guidelines or product sheets.</p>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="file" id="pdf-file-input" accept=".pdf" style="font-size:13px">
+            <button type="button" id="btn-upload-pdf" class="btn-secondary" onclick="uploadDrugPdfFile()" style="padding:8px 16px;font-size:13px">
+              <span>Upload &amp; Ingest</span>
+            </button>
+          </div>
+          <div id="pdf-status" style="font-size:12px;margin-top:6px;color:var(--text-dim)"></div>
+        </div>
+
+        <!-- Section 3: Currently Ingested Documents List -->
+        <div>
+          <h4 style="font-size:14px;font-weight:700;margin:0 0 10px">Currently Ingested Documents (<span id="drug-doc-count">0</span>)</h4>
+          <div class="table-responsive">
+            <table class="data-table" style="font-size:12.5px">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Source</th>
+                  <th>Ingested Date</th>
+                  <th style="text-align:right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="drug-docs-table-body">
+                <tr>
+                  <td colspan="4" style="text-align:center;padding:15px;color:var(--text-dim)">Loading ingested sources...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Health Screening Report Modal -->
   <div id="report-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeReportModal()">
     <div class="modal-card report-card-modal">
@@ -2560,7 +3149,7 @@ main {
   <!-- Floating Chatbot Widget (Present on all pages) -->
   <aside id="chatbot-container" class="chatbot-container" aria-label="Health Chatbot Assistant">
     <!-- Chatbot Window Popup -->
-    <div id="chatbot-window" class="chatbot-window" role="dialog" aria-modal="false" aria-label="UyirBot Health Assistant" style="display:none">
+    <div id="chatbot-window" class="chatbot-window" role="dialog" aria-modal="false" aria-label="VaagaiBot Health Assistant" style="display:none">
       <!-- Header -->
       <div class="chatbot-header">
         <div class="chatbot-header-info">
@@ -2574,7 +3163,7 @@ main {
             </svg>
           </div>
           <div>
-            <div class="chatbot-header-title">UyirBot</div>
+            <div class="chatbot-header-title">VaagaiBot</div>
             <div class="chatbot-header-status">
               <span class="chatbot-status-dot"></span>
               <span>Online • Health Assistant</span>
@@ -2589,6 +3178,18 @@ main {
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
+      </div>
+
+      <!-- Chatbot Dual Mode Switcher (Blood Sugar vs Drug Info) -->
+      <div class="chatbot-mode-bar" id="chatbot-mode-bar" role="tablist">
+        <button type="button" class="chatbot-mode-tab active" id="cb-mode-sugar" onclick="setFloatingBotMode('sugar')" role="tab" aria-selected="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>Blood Sugar &amp; Risk</span>
+        </button>
+        <button type="button" class="chatbot-mode-tab" id="cb-mode-drug" onclick="setFloatingBotMode('drug')" role="tab" aria-selected="false">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>
+          <span>Drug Info (RAG)</span>
+        </button>
       </div>
 
       <!-- Messages Body -->
@@ -2606,7 +3207,7 @@ main {
       <!-- Suggested Prompt Chips -->
       <div id="chatbot-chips-wrap" class="chatbot-chips-bar">
         <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What is normal blood sugar?')">Normal blood sugar?</button>
-        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How does the Uyir Score test work?')">How does test work?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How does the Vaagai Pharm test work?')">How does test work?</button>
         <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How can I lower my diabetes risk?')">Lower diabetes risk?</button>
         <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What is BMI for Indians?')">BMI guidelines?</button>
         <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('When should I seek emergency care?')">Emergency warning signs</button>
@@ -2615,7 +3216,7 @@ main {
       <!-- Input Footer -->
       <form id="chatbot-form" class="chatbot-footer" onsubmit="handleChatbotSubmit(event)">
         <div class="chatbot-input-row">
-          <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask UyirBot a health question..." autocomplete="off" aria-label="Type your message">
+          <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask VaagaiBot a health or medicine question..." autocomplete="off" aria-label="Type your message">
           <button type="submit" id="chatbot-send-btn" class="chatbot-send-btn" aria-label="Send message">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -2630,9 +3231,9 @@ main {
     <!-- Floating Chatbot Launcher Button -->
     <div class="chatbot-launcher-wrap">
       <div id="chatbot-pill" class="chatbot-tooltip-pill">
-        <span>Need help? Chat with <strong>UyirBot</strong></span>
+        <span>Need help? Chat with <strong>VaagaiBot</strong></span>
       </div>
-      <button type="button" id="chatbot-trigger-btn" class="chatbot-trigger-btn" onclick="toggleChatbot()" aria-label="Open health assistant chatbot" aria-expanded="false" title="Chat with UyirBot">
+      <button type="button" id="chatbot-trigger-btn" class="chatbot-trigger-btn" onclick="toggleChatbot()" aria-label="Open health assistant chatbot" aria-expanded="false" title="Chat with VaagaiBot">
         <!-- Chatbot / Robot Icon (visible when closed) -->
         <span class="chatbot-icon-closed">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2659,7 +3260,7 @@ main {
   <!-- Embedded JavaScript Application -->
   <script>
 /* ========================================================= */
-/* UYIR SCORE CLIENT APPLICATION                             */
+/* VAAGAI PHARM CLIENT APPLICATION                             */
 /* ========================================================= */
 
 // Utility: Escape dynamic HTML to prevent injection
@@ -2672,6 +3273,7 @@ function esc(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+const escapeHtml = esc;
 
 // Format INR in Lakh and Crore
 function formatINR(val) {
@@ -2770,21 +3372,6 @@ function persistResult(res) {
   } catch (e) {}
 }
 
-/* ========================================================= */
-/* THEME MANAGEMENT                                          */
-/* ========================================================= */
-function initTheme() {
-  try {
-    const saved = localStorage.getItem("uyir_theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const theme = saved || (prefersDark ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", theme);
-    updateThemeIcon(theme);
-  } catch (e) {
-    updateThemeIcon("light");
-  }
-}
-
 function toggleTheme() {
   try {
     const current = document.documentElement.getAttribute("data-theme") || "light";
@@ -2828,6 +3415,474 @@ function closeMobileMenu() {
 /* ========================================================= */
 /* ROUTING ENGINE                                            */
 /* ========================================================= */
+
+/* ========================================================= */
+/* INVENTORY & PHARMACY MANAGEMENT JAVASCRIPT               */
+/* ========================================================= */
+let inventoryData = [];
+let inventorySortCol = 'medicine_name';
+let inventorySortAsc = true;
+let inventoryFilterQuery = '';
+
+async function loadInventory() {
+  try {
+    const res = await fetch('/api/inventory');
+    const data = await res.json();
+    inventoryData = data.items || [];
+
+    // Update Stat Cards
+    const lowStockCount = inventoryData.filter(i => i.is_low_stock).length;
+    const nearExpiryCount = inventoryData.filter(i => i.is_near_expiry).length;
+    const totalCount = inventoryData.length;
+
+    const elLow = document.getElementById('stat-low-stock-count');
+    const elExp = document.getElementById('stat-near-expiry-count');
+    const elTot = document.getElementById('stat-total-items-count');
+
+    if (elLow) elLow.textContent = lowStockCount;
+    if (elExp) elExp.textContent = nearExpiryCount;
+    if (elTot) elTot.textContent = totalCount;
+
+    renderInventoryTable();
+  } catch (err) {
+    console.error('Failed to load inventory:', err);
+    const tbody = document.getElementById('inventory-table-body');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--band-high)">Failed to connect to inventory server.</td></tr>';
+    }
+  }
+}
+
+function handleInventorySearch() {
+  const input = document.getElementById('inventory-search-input');
+  inventoryFilterQuery = input ? input.value.trim().toLowerCase() : '';
+  renderInventoryTable();
+}
+
+function sortInventory(col) {
+  if (inventorySortCol === col) {
+    inventorySortAsc = !inventorySortAsc;
+  } else {
+    inventorySortCol = col;
+    inventorySortAsc = true;
+  }
+  renderInventoryTable();
+}
+
+function renderInventoryTable() {
+  const tbody = document.getElementById('inventory-table-body');
+  if (!tbody) return;
+
+  // Filter
+  let filtered = inventoryData.filter(item => {
+    if (!inventoryFilterQuery) return true;
+    const name = (item.medicine_name || '').toLowerCase();
+    const ingr = (item.active_ingredient || '').toLowerCase();
+    return name.includes(inventoryFilterQuery) || ingr.includes(inventoryFilterQuery);
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    let vA = a[inventorySortCol];
+    let vB = b[inventorySortCol];
+    if (vA === null || vA === undefined) vA = '';
+    if (vB === null || vB === undefined) vB = '';
+    if (typeof vA === 'string') vA = vA.toLowerCase();
+    if (typeof vB === 'string') vB = vB.toLowerCase();
+
+    if (vA < vB) return inventorySortAsc ? -1 : 1;
+    if (vA > vB) return inventorySortAsc ? 1 : -1;
+    return 0;
+  });
+
+  // Update header arrows
+  ['medicine_name', 'active_ingredient', 'current_stock', 'minimum_required_stock', 'expiry_date'].forEach(c => {
+    const icon = document.getElementById('sort-icon-' + c);
+    if (icon) {
+      icon.innerHTML = (inventorySortCol === c) ? (inventorySortAsc ? '&uarr;' : '&darr;') : '&uarr;&darr;';
+      icon.style.color = (inventorySortCol === c) ? 'var(--primary)' : 'var(--text-dim)';
+    }
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-dim)">No medicines found matching criteria.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(item => {
+    // Pure comparison badges:
+    // current_stock <= minimum_required_stock -> Low Stock
+    // expiry_date <= today + 30 days -> Near Expiry
+    // neither -> OK
+    // Can show both badges
+    let badges = [];
+    if (item.is_low_stock) {
+      badges.push('<span class="badge badge-low-stock">Low Stock</span>');
+    }
+    if (item.is_near_expiry) {
+      badges.push('<span class="badge badge-near-expiry">Near Expiry</span>');
+    }
+    if (!item.is_low_stock && !item.is_near_expiry) {
+      badges.push('<span class="badge badge-ok">OK</span>');
+    }
+
+    const expStr = item.expiry_date || '<span style="color:var(--text-dim)">&mdash;</span>';
+
+    return `
+      <tr>
+        <td style="font-weight:700">${escapeHtml(item.medicine_name)}</td>
+        <td style="color:var(--text-muted)">${escapeHtml(item.active_ingredient || '—')}</td>
+        <td style="text-align:right;font-weight:700;${item.is_low_stock ? 'color:var(--band-high)' : ''}">${item.current_stock}</td>
+        <td style="text-align:right;color:var(--text-dim)">${item.minimum_required_stock}</td>
+        <td>${expStr}</td>
+        <td><div style="display:flex;gap:4px;flex-wrap:wrap">${badges.join(' ')}</div></td>
+        <td style="text-align:right;white-space:nowrap">
+          <button type="button" class="btn-subtle" onclick="openEditMedicineModal(${item.id})" style="padding:4px 8px;margin-right:4px">Edit</button>
+          <button type="button" class="btn-subtle" onclick="deleteMedicine(${item.id}, '${escapeHtml(item.medicine_name).replace(/'/g, "\'")}')" style="padding:4px 8px;color:var(--band-high);border-color:rgba(185,28,28,0.3)">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openAddMedicineModal() {
+  document.getElementById('inventory-modal-title').textContent = 'Add New Medicine';
+  document.getElementById('inv-id').value = '';
+  document.getElementById('inv-medicine-name').value = '';
+  document.getElementById('inv-active-ingredient').value = '';
+  document.getElementById('inv-current-stock').value = '';
+  document.getElementById('inv-minimum-stock').value = '10';
+  document.getElementById('inv-expiry-date').value = '';
+  document.getElementById('inventory-modal').style.display = 'flex';
+}
+
+function openEditMedicineModal(id) {
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById('inventory-modal-title').textContent = 'Edit Medicine';
+  document.getElementById('inv-id').value = item.id;
+  document.getElementById('inv-medicine-name').value = item.medicine_name;
+  document.getElementById('inv-active-ingredient').value = item.active_ingredient || '';
+  document.getElementById('inv-current-stock').value = item.current_stock;
+  document.getElementById('inv-minimum-stock').value = item.minimum_required_stock;
+  document.getElementById('inv-expiry-date').value = item.expiry_date || '';
+  document.getElementById('inventory-modal').style.display = 'flex';
+}
+
+function closeInventoryModal() {
+  document.getElementById('inventory-modal').style.display = 'none';
+}
+
+async function handleSaveInventory(e) {
+  e.preventDefault();
+  const id = document.getElementById('inv-id').value;
+  const medicine_name = document.getElementById('inv-medicine-name').value.trim();
+  const active_ingredient = document.getElementById('inv-active-ingredient').value.trim();
+  const current_stock = parseInt(document.getElementById('inv-current-stock').value, 10);
+  const minimum_required_stock = parseInt(document.getElementById('inv-minimum-stock').value, 10) || 10;
+  const expiry_date = document.getElementById('inv-expiry-date').value || null;
+
+  if (!medicine_name) {
+    alert('Medicine name is required.');
+    return;
+  }
+  if (isNaN(current_stock)) {
+    alert('Valid current stock is required.');
+    return;
+  }
+
+  const payload = {
+    medicine_name,
+    active_ingredient,
+    current_stock,
+    minimum_required_stock,
+    expiry_date
+  };
+
+  const btn = document.getElementById('btn-save-inv');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    let url = '/api/inventory';
+    let method = 'POST';
+    if (id) {
+      url += '/' + id;
+      method = 'PUT';
+    }
+
+    const res = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      closeInventoryModal();
+      await loadInventory();
+    } else {
+      alert(result.error || 'Failed to save inventory item.');
+    }
+  } catch (err) {
+    alert('Connection error while saving item.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Medicine';
+  }
+}
+
+async function deleteMedicine(id, name) {
+  if (!confirm(`Are you sure you want to remove "${name}" from inventory?`)) return;
+  try {
+    const res = await fetch('/api/inventory/' + id, { method: 'DELETE' });
+    const result = await res.json();
+    if (res.ok) {
+      await loadInventory();
+    } else {
+      alert(result.error || 'Failed to delete item.');
+    }
+  } catch (err) {
+    alert('Connection error while deleting item.');
+  }
+}
+
+function exportLowStockCsv() {
+  window.location.href = '/api/inventory/export-low-stock';
+}
+
+/* ========================================================= */
+/* DRUG CHATBOT (RAG) JAVASCRIPT                             */
+/* ========================================================= */
+let drugChatMessages = [];
+
+function sendDrugChip(promptText) {
+  const input = document.getElementById('drug-chat-input');
+  if (input) {
+    input.value = promptText;
+    handleDrugChatSubmit(new Event('submit'));
+  }
+}
+
+async function handleDrugChatSubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('drug-chat-input');
+  const question = input ? input.value.trim() : '';
+  if (!question) return;
+
+  input.value = '';
+  appendDrugMessage('user', question);
+
+  const typing = document.getElementById('drug-chat-typing');
+  const sendBtn = document.getElementById('drug-chat-send-btn');
+  const statusEl = document.getElementById('drug-chat-status');
+
+  if (typing) typing.style.display = 'flex';
+  if (sendBtn) sendBtn.disabled = true;
+  if (statusEl) statusEl.textContent = 'Searching knowledge base...';
+
+  try {
+    const res = await fetch('/api/drug-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+    const data = await res.json();
+
+    appendDrugMessage('bot', data.answer || 'No response returned.', data.sources || []);
+  } catch (err) {
+    appendDrugMessage('bot', 'Network error connecting to drug information service. Please ensure the server is running.', []);
+  } finally {
+    if (typing) typing.style.display = 'none';
+    if (sendBtn) sendBtn.disabled = false;
+    if (statusEl) statusEl.textContent = 'Ready';
+  }
+}
+
+function appendDrugMessage(role, text, sources = []) {
+  const container = document.getElementById('drug-chat-messages');
+  if (!container) return;
+
+  const bubble = document.createElement('div');
+  bubble.className = `drug-msg-bubble ${role === 'user' ? 'drug-msg-user' : 'drug-msg-bot'}`;
+
+  let bodyHtml = escapeHtml(text).replace(/\n/g, '<br>');
+  // Format bold markdown
+  bodyHtml = bodyHtml.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  if (sources && sources.length > 0) {
+    let sourceBadges = sources.map(s => {
+      if (s.source_url) {
+        return `<a href="${escapeHtml(s.source_url)}" target="_blank" rel="noopener noreferrer" class="source-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ${escapeHtml(s.title || 'openFDA')}
+        </a>`;
+      } else {
+        return `<span class="source-tag source-tag-pdf">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          ${escapeHtml(s.title || 'PDF Document')}
+        </span>`;
+      }
+    }).join(' ');
+
+    bodyHtml += `<div class="sources-bar">
+      <strong style="color:var(--text-dim)">Sources:</strong> ${sourceBadges}
+    </div>`;
+  }
+
+  bubble.innerHTML = bodyHtml;
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+/* Manage Sources Modal */
+async function openManageSourcesModal() {
+  document.getElementById('manage-sources-modal').style.display = 'flex';
+  await loadDrugDocuments();
+}
+
+function closeManageSourcesModal() {
+  document.getElementById('manage-sources-modal').style.display = 'none';
+}
+
+async function loadDrugDocuments() {
+  try {
+    const res = await fetch('/api/drug-documents');
+    const data = await res.json();
+    const docs = data.documents || [];
+
+    const countEl = document.getElementById('drug-doc-count');
+    if (countEl) countEl.textContent = docs.length;
+
+    const tbody = document.getElementById('drug-docs-table-body');
+    if (!tbody) return;
+
+    if (docs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-dim)">No documents ingested yet. Fetch an openFDA label or upload a PDF above.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = docs.map(d => {
+      const srcBadge = d.source_type === 'openFDA'
+        ? '<span class="badge" style="background:var(--primary-light);color:var(--primary)">openFDA</span>'
+        : '<span class="badge" style="background:var(--bg-subtle);color:var(--text-muted)">PDF Upload</span>';
+
+      const dateStr = d.created_at ? d.created_at.split('T')[0] : '—';
+      const linkHtml = d.source_url
+        ? `<a href="${escapeHtml(d.source_url)}" target="_blank" style="color:var(--primary);text-decoration:none">${escapeHtml(d.title)}</a>`
+        : escapeHtml(d.title);
+
+      return `
+        <tr>
+          <td style="font-weight:600">${linkHtml}</td>
+          <td>${srcBadge}</td>
+          <td style="color:var(--text-dim)">${dateStr}</td>
+          <td style="text-align:right">
+            <button type="button" class="btn-subtle" onclick="deleteDrugDocument(${d.id})" style="color:var(--band-high);padding:3px 8px">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load drug documents:', err);
+  }
+}
+
+async function fetchOpenFdaDrug() {
+  const input = document.getElementById('openfda-input');
+  const drugName = input ? input.value.trim() : '';
+  if (!drugName) {
+    alert('Please enter a drug generic or brand name.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-fetch-openfda');
+  const statusEl = document.getElementById('openfda-status');
+  btn.disabled = true;
+  statusEl.textContent = 'Querying openFDA API and embedding label sections...';
+  statusEl.style.color = 'var(--primary)';
+
+  try {
+    const res = await fetch('/api/drug-documents/fetch-openfda', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ drug_name: drugName })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      statusEl.textContent = `Ingested "${data.title}" successfully (${data.chunks_count} knowledge chunks)!`;
+      statusEl.style.color = 'var(--band-low)';
+      input.value = '';
+      await loadDrugDocuments();
+    } else {
+      statusEl.textContent = data.error || 'Failed to fetch drug from openFDA.';
+      statusEl.style.color = 'var(--band-high)';
+    }
+  } catch (err) {
+    statusEl.textContent = 'Connection error contacting openFDA endpoint.';
+    statusEl.style.color = 'var(--band-high)';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function uploadDrugPdfFile() {
+  const fileInput = document.getElementById('pdf-file-input');
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert('Please choose a PDF file to upload.');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const btn = document.getElementById('btn-upload-pdf');
+  const statusEl = document.getElementById('pdf-status');
+  btn.disabled = true;
+  statusEl.textContent = 'Extracting PDF text, chunking and embedding...';
+  statusEl.style.color = 'var(--primary)';
+
+  try {
+    const res = await fetch('/api/drug-documents/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      statusEl.textContent = `Uploaded "${data.title}" successfully (${data.chunks_count} chunks)!`;
+      statusEl.style.color = 'var(--band-low)';
+      fileInput.value = '';
+      await loadDrugDocuments();
+    } else {
+      statusEl.textContent = data.error || 'Failed to parse and upload PDF.';
+      statusEl.style.color = 'var(--band-high)';
+    }
+  } catch (err) {
+    statusEl.textContent = 'Connection error uploading PDF.';
+    statusEl.style.color = 'var(--band-high)';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteDrugDocument(id) {
+  if (!confirm('Are you sure you want to remove this document and its chunk embeddings from the knowledge base?')) return;
+  try {
+    const res = await fetch('/api/drug-documents/' + id, { method: 'DELETE' });
+    if (res.ok) {
+      await loadDrugDocuments();
+    } else {
+      alert('Failed to delete document.');
+    }
+  } catch (err) {
+    alert('Error connecting to server.');
+  }
+}
+
 function handleRouting() {
   try {
     clearTimeout(autoAdvanceTimer);
@@ -2852,26 +3907,30 @@ function handleRouting() {
     sections.forEach(sec => sec.classList.remove("active"));
 
     // Route Dispatcher
-    if (cleanHash === "#home" || cleanHash === "") {
-      showPanel("page-home");
+    if (cleanHash === "#dashboard" || cleanHash === "#home" || cleanHash === "") {
+      showPanel("page-dashboard");
+      loadInventory();
     } else if (cleanHash.startsWith("#test")) {
       showPanel("page-test");
       routeTestSubviews(cleanHash);
+    } else if (cleanHash === "#clinics") {
+      showPanel("page-clinics");
+      loadClinicAnalytics();
+    } else if (cleanHash === "#drug-chat") {
+      showPanel("page-drug-chat");
     } else if (cleanHash === "#guide") {
       showPanel("page-guide");
     } else if (cleanHash === "#help") {
       showPanel("page-help");
-    } else if (cleanHash === "#clinics") {
-      showPanel("page-clinics");
-      loadClinicAnalytics();
     } else if (cleanHash === "#about") {
       showPanel("page-about");
     } else {
-      showPanel("page-home");
+      showPanel("page-dashboard");
+      loadInventory();
     }
 
-    // Toggle Static Viewport Mode (disables scrolling on #home, #help and question cards)
-    if (cleanHash === "#home" || cleanHash === "" || cleanHash === "#help" || (cleanHash.startsWith("#test") && cleanHash !== "#test/result")) {
+    // Toggle Static Viewport Mode (disables scrolling only on compact card views)
+    if (cleanHash === "#help" || (cleanHash.startsWith("#test") && cleanHash !== "#test/result")) {
       document.body.classList.add("static-view");
     } else {
       document.body.classList.remove("static-view");
@@ -3244,7 +4303,7 @@ function renderQuestion(q) {
 
       <div class="notice-card warning" style="margin-top:var(--space-4)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-        <div><strong>Privacy Reminder</strong>: Uyir Score preserves your privacy. Keep this note impersonal.</div>
+        <div><strong>Privacy Reminder</strong>: Vaagai Pharm preserves your privacy. Keep this note impersonal.</div>
       </div>
     `;
     nextLabel = "Check your answers";
@@ -3928,7 +4987,7 @@ function resetAndRestart() {
 function copyResultSummary() {
   if (!currentResult) return;
   const d = currentResult;
-  const summary = `Uyir Score Screening Result:
+  const summary = `Vaagai Pharm Screening Result:
 Estimated Risk: ${Math.round(d.risk * 100)}% (${d.band} risk)
 Summary: ${d.explanation || ''}
 Disclaimer: General information only, not a diagnosis. Confirm with a lab test.`;
@@ -3953,7 +5012,7 @@ function generateReportText() {
   const timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 
   let text = `================================================================================
-                    UYIR SCORE HEALTH SCREENING REPORT
+                    VAAGAI PHARM HEALTH SCREENING REPORT
            Type 2 Diabetes Risk Assessment - Clinical Guidance for India
 ================================================================================
 Generated On:   ${dateStr}, ${timeStr}
@@ -4016,7 +5075,7 @@ function populateReportSheet() {
     <!-- Report Document Header -->
     <div style="border-bottom:2px solid var(--primary);padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
       <div>
-        <h2 style="font-size:20px;font-weight:800;color:var(--primary);margin:0 0 4px;letter-spacing:-0.3px">Uyir Score Health Screening Report</h2>
+        <h2 style="font-size:20px;font-weight:800;color:var(--primary);margin:0 0 4px;letter-spacing:-0.3px">Vaagai Pharm Health Screening Report</h2>
         <div style="font-size:12.5px;color:var(--text-dim)">Community Type 2 Diabetes Risk Assessment &#8226; Clinical Guidance for India</div>
       </div>
       <div style="text-align:right;font-size:12px;color:var(--text-dim);line-height:1.4">
@@ -4147,7 +5206,7 @@ function downloadReportTxt() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "UyirScore_Health_Report.txt";
+  a.download = "VaagaiPharm_Health_Report.txt";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -4347,14 +5406,14 @@ function toggleFaq(btn) {
 /* ========================================================= */
 
 /* ========================================================= */
-/* CHATBOT ASSISTANT (UYIRBOT)                               */
+/* CHATBOT ASSISTANT (VAAGAIBOT)                               */
 /* ========================================================= */
 let chatbotOpen = false;
 let chatbotMessages = [];
 
 const DEFAULT_BOT_GREETINGS = [
-  "Hello! 👋 I'm **UyirBot**, your diabetes screening and health assistant.",
-  "Ask me anything about blood sugar ranges, how to use Uyir Score, healthy lifestyle habits, or warning signs to watch for."
+  "Hello! I'm **VaagaiBot**, your pharmacy and clinical health assistant.",
+  "Ask me anything about blood sugar ranges, how to use Vaagai Pharm, healthy lifestyle habits, or warning signs to watch for."
 ];
 
 function initChatbot() {
@@ -4416,7 +5475,7 @@ function toggleChatbot(forceState) {
 
   if (btn) {
     btn.setAttribute("aria-expanded", chatbotOpen ? "true" : "false");
-    btn.title = chatbotOpen ? "Close chat" : "Chat with UyirBot";
+    btn.title = chatbotOpen ? "Close chat" : "Chat with VaagaiBot";
   }
 
   if (iconClosed && iconOpened) {
@@ -4514,6 +5573,56 @@ function handleChatbotSubmit(event) {
   sendMessage(text);
 }
 
+let floatingBotMode = "sugar"; // 'sugar' or 'drug'
+
+function setFloatingBotMode(mode) {
+  floatingBotMode = mode;
+  const tabSugar = document.getElementById("cb-mode-sugar");
+  const tabDrug = document.getElementById("cb-mode-drug");
+  const statusEl = document.querySelector(".chatbot-header-status span:last-child");
+  const inputEl = document.getElementById("chatbot-input");
+  const chipsWrap = document.getElementById("chatbot-chips-wrap");
+
+  if (mode === "drug") {
+    if (tabSugar) { tabSugar.classList.remove("active"); tabSugar.setAttribute("aria-selected", "false"); }
+    if (tabDrug) { tabDrug.classList.add("active"); tabDrug.setAttribute("aria-selected", "true"); }
+    if (statusEl) statusEl.textContent = "Online • Drug Info (RAG)";
+    if (inputEl) inputEl.placeholder = "Ask about drug dosage, warning, contraindication...";
+    if (chipsWrap) {
+      chipsWrap.innerHTML = `
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What are the indications and dosage for Metformin?')">Metformin dosage?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What are warnings for Amoxicillin?')">Amoxicillin warnings?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What adverse reactions occur with Atorvastatin?')">Atorvastatin side effects?</button>
+      `;
+    }
+  } else {
+    if (tabSugar) { tabSugar.classList.add("active"); tabSugar.setAttribute("aria-selected", "true"); }
+    if (tabDrug) { tabDrug.classList.remove("active"); tabDrug.setAttribute("aria-selected", "false"); }
+    if (statusEl) statusEl.textContent = "Online • Health Assistant";
+    if (inputEl) inputEl.placeholder = "Ask VaagaiBot a health or medicine question...";
+    if (chipsWrap) {
+      chipsWrap.innerHTML = `
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What is normal blood sugar?')">Normal blood sugar?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How does the Vaagai Pharm test work?')">How does test work?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('How can I lower my diabetes risk?')">Lower diabetes risk?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('What is BMI for Indians?')">BMI guidelines?</button>
+        <button type="button" class="chatbot-chip-btn" onclick="sendSuggestedPrompt('When should I seek emergency care?')">Emergency warning signs</button>
+      `;
+    }
+  }
+}
+
+function isDrugQueryText(text) {
+  const q = text.toLowerCase();
+  const drugKeywords = [
+    "drug", "medicine", "medication", "pill", "tablet", "capsule", "dosage", "dose",
+    "warning", "contraindication", "adverse", "reaction", "side effect",
+    "metformin", "amoxicillin", "atorvastatin", "paracetamol", "aspirin", "antibiotic",
+    "statin", "lisinopril", "omeprazole", "ciprofloxacin", "prescription", "fda"
+  ];
+  return drugKeywords.some(kw => q.includes(kw));
+}
+
 async function sendMessage(userText) {
   chatbotMessages.push({ sender: "user", text: userText });
   renderChatbotMessages();
@@ -4530,20 +5639,47 @@ async function sendMessage(userText) {
 
   let botReply = "";
 
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userText })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.reply) {
-        botReply = data.reply;
+  // DUAL-CAPABILITY CHATBOT ROUTING:
+  // If in 'drug' mode OR query contains drug keywords -> Query Drug RAG endpoint (/api/drug-chat)
+  // Otherwise -> Query Diabetes/Clinical Screening endpoint (/api/chat)
+  const queryIsDrug = floatingBotMode === "drug" || isDrugQueryText(userText);
+
+  if (queryIsDrug) {
+    try {
+      const res = await fetch("/api/drug-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userText })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.answer) {
+          botReply = data.answer;
+          if (data.sources && data.sources.length > 0) {
+            const srcList = data.sources.map(s => s.title).join(", ");
+            botReply += `\n\n*(Sources: ${srcList})*`;
+          }
+        }
       }
+    } catch (err) {
+      console.warn("Drug RAG query failed:", err);
     }
-  } catch (err) {
-    // API not running or unreachable -> gracefully fall through
+  } else {
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.reply) {
+          botReply = data.reply;
+        }
+      }
+    } catch (err) {
+      // Fall through to client reply
+    }
   }
 
   if (!botReply) {
@@ -4584,7 +5720,7 @@ function getClientBotReply(query) {
   }
 
   if (q.includes("how does") || q.includes("how do i") || q.includes("take test") || q.includes("test work") || q.includes("uyir score") || q.includes("start")) {
-    return "**How the Uyir Score Test Works:**\n" +
+    return "**How the Vaagai Pharm Test Works:**\n" +
       "1. Click **'Check my risk'** or **'Start the test'** at the top.\n" +
       "2. Answer 9 simple questions on age, BMI, family history, blood pressure, and blood sugar (if known).\n" +
       "3. Takes under **2 minutes**.\n" +
@@ -4607,11 +5743,11 @@ function getClientBotReply(query) {
       "• **Normal Weight:** 18.5 – 22.9\n" +
       "• **Overweight:** 23.0 – 24.9\n" +
       "• **High Risk / Obesity:** 25.0 and above\n\n" +
-      "You can enter your height and weight in step 3 of the test and Uyir Score will calculate your BMI automatically!";
+      "You can enter your height and weight in step 3 of the test and Vaagai Pharm will calculate your BMI automatically!";
   }
 
   if (q.includes("emergency") || q.includes("hospital") || q.includes("urgent") || q.includes("108") || q.includes("help") || q.includes("danger") || q.includes("symptom")) {
-    return "🚨 **Urgent Warning Signs:**\n" +
+    return "**Urgent Warning Signs:**\n" +
       "Seek emergency medical evaluation if you experience:\n" +
       "• **Severe High Blood Sugar:** Blood sugar > 300 mg/dL with vomiting, confusion, or fruity breath (DKA warning).\n" +
       "• **Severe Low Blood Sugar:** Blood sugar < 70 mg/dL with cold sweats, shakiness, confusion, or fainting.\n" +
@@ -4639,20 +5775,24 @@ function getClientBotReply(query) {
   }
 
   if (q.includes("hi") || q.includes("hello") || q.includes("namaste") || q.includes("hey") || q.includes("who are you")) {
-    return "Hello! 👋 I'm **UyirBot**, your diabetes screening companion. How can I help you today? You can ask about:\n" +
+    return "Hello! I'm **VaagaiBot**, your diabetes screening companion. How can I help you today? You can ask about:\n" +
       "• Normal blood sugar and HbA1c levels\n" +
-      "• How to take the Uyir Score screening test\n" +
+      "• How to take the Vaagai Pharm screening test\n" +
       "• Everyday diet, millets, and exercise tips\n" +
       "• Understanding your BMI and health numbers";
   }
 
-  return "Thank you for asking! I can help you understand your diabetes risk factors, normal blood sugar numbers, Indian dietary tips (like millets and whole grains), how to calculate your BMI, or how to take the Uyir Score 2-minute test.\n\n" +
+  return "Thank you for asking! I can help you understand your diabetes risk factors, normal blood sugar numbers, Indian dietary tips (like millets and whole grains), how to calculate your BMI, or how to take the Vaagai Pharm 2-minute test.\n\n" +
     "Feel free to click any of the suggested question buttons below or type your question!";
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  try {
+    localStorage.removeItem("uyir_theme");
+    localStorage.removeItem("theme");
+    document.documentElement.removeAttribute("data-theme");
+  } catch (e) {}
   initChatbot();
-  initTheme();
   loadPersistedState();
   handleRouting();
 });
