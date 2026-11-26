@@ -22,7 +22,7 @@ import urllib.request
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SCREENSHOT_DIR_1 = os.path.join(HERE, "docs", "screenshots")
+SCREENSHOT_DIR_1 = os.path.join(HERE, "static", "screenshots")
 SCREENSHOT_DIR_2 = r"C:\Users\Admin\.gemini\antigravity\brain\4d8edd41-f5ca-4a83-a176-95b37e1048f3\screenshots"
 os.makedirs(SCREENSHOT_DIR_1, exist_ok=True)
 os.makedirs(SCREENSHOT_DIR_2, exist_ok=True)

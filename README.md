@@ -8,11 +8,11 @@
 
 | Pharmacy Dashboard (Desktop 1280px) | Drug Information RAG (Desktop 1280px) |
 | :---: | :---: |
-| ![Dashboard](docs/screenshots/01_dashboard_1280px.png) | ![Drug Chat](docs/screenshots/05_drug_chat_1280px.png) |
+| ![Dashboard](static/screenshots/01_dashboard_1280px.png) | ![Drug Chat](static/screenshots/05_drug_chat_1280px.png) |
 
 | Stock Alert Badges & Low Stock Table | Responsive Mobile View (390px) |
 | :---: | :---: |
-| ![Inventory Badges](docs/screenshots/08_inventory_badges_1280px.png) | ![Mobile View](docs/screenshots/02_dashboard_390px.png) |
+| ![Inventory Badges](static/screenshots/08_inventory_badges_1280px.png) | ![Mobile View](static/screenshots/02_dashboard_390px.png) |
 
 ---
 
@@ -83,13 +83,6 @@ Vaagai- Pharm/
 ├── start.bat                   # 1-click start script for Windows
 ├── start.sh                    # 1-click start script for Linux / macOS
 │
-├── docs/
-│   └── screenshots/            # Verified visual assets (< 1 MB total)
-│       ├── 01_dashboard_1280px.png
-│       ├── 02_dashboard_390px.png
-│       ├── 05_drug_chat_1280px.png
-│       └── 08_inventory_badges_1280px.png
-│
 ├── ml/                         # Clinical ML models & training references
 │   ├── model.joblib            # Trained Random Forest classifier
 │   ├── metrics.json            # Model evaluation metrics
@@ -101,7 +94,12 @@ Vaagai- Pharm/
 │   └── index.html              # Responsive single-page application (4 primary tabs)
 │
 ├── static/
-│   └── logo.png                # Brand logo asset
+│   ├── logo.png                # Brand logo asset
+│   └── screenshots/            # Verified visual tour assets (< 1 MB total)
+│       ├── 01_dashboard_1280px.png
+│       ├── 02_dashboard_390px.png
+│       ├── 05_drug_chat_1280px.png
+│       └── 08_inventory_badges_1280px.png
 │
 └── tests/                      # Automated test suite
     ├── test_api.py             # 21 comprehensive pytest integration tests
